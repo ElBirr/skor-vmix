@@ -1,0 +1,366 @@
+:root {
+  --accent: #f5a623;
+  --bg-panel: rgba(12, 16, 24, 0.88);
+  --bg-team: rgba(20, 26, 36, 0.92);
+  --text-primary: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.65);
+  --home-color: #2563eb;
+  --away-color: #dc2626;
+  --score-size: 64px;
+  --name-size: 30px;
+  --radius: 10px;
+  --gap: 4px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.overlay {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 10;
+  animation: fadeIn 0.4s ease;
+}
+
+.pos-bottom {
+  bottom: 48px;
+}
+
+.pos-top {
+  top: 48px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.scoreboard {
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-panel);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+  min-height: 88px;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  background: var(--bg-team);
+  min-width: 280px;
+}
+
+.team-color {
+  width: 8px;
+  height: 56px;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.team-home .team-color {
+  background: var(--home-color);
+}
+
+.team-away .team-color {
+  background: var(--away-color);
+}
+
+.team-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.team-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 20px;
+}
+
+.sets-won {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.sets-won .set-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+}
+
+.sets-won .set-dot.won {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.timeout-dots {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.timeout-dots .to-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.timeout-dots .to-dot.used {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Serve indicator (voli) */
+.serve-mark {
+  width: 0;
+  height: 0;
+  border-top: 12px solid #fff;
+  border-bottom: 12px solid #fff;
+  border-right: 20px solid var(--accent);
+  flex-shrink: 0;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease;
+}
+
+.team-home .serve-mark {
+  border-left: 0;
+  margin-right: 4px;
+}
+
+.team-away .serve-mark {
+  border-right: 0;
+  border-left: 20px solid var(--accent);
+  margin-left: 4px;
+}
+
+.sport-volley .serve-mark.serving {
+  opacity: 1;
+  visibility: visible;
+}
+
+.sport-futsal .serve-mark,
+.sport-futsal .team-meta {
+  display: none;
+}
+
+
+.team-name {
+  color: var(--text-primary);
+  font-size: var(--name-size);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-sub {
+  color: var(--text-muted);
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 18px;
+}
+
+.team-score {
+  color: var(--text-primary);
+  font-size: var(--score-size);
+  font-weight: 800;
+  line-height: 1;
+  min-width: 72px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 0 28px;
+  background: var(--accent);
+  min-width: 120px;
+}
+
+.period {
+  color: #111;
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  line-height: 1.1;
+}
+
+.clock {
+  color: #111;
+  font-size: 26px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.clock:empty,
+.status:empty {
+  display: none;
+}
+
+.status {
+  color: rgba(0, 0, 0, 0.7);
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Set strip (voli) */
+.set-strip {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 18px;
+  background: var(--bg-panel);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+}
+
+.set-strip[hidden] {
+  display: none;
+}
+
+.set-label {
+  color: var(--text-muted);
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.set-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.set-item .set-num {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.set-item.current {
+  color: var(--accent);
+}
+
+/* Futsal adjustments */
+.sport-futsal .team {
+  min-width: 260px;
+}
+
+.sport-futsal .center {
+  min-width: 140px;
+}
+
+/* Volleyball adjustments */
+.sport-volley .team-score {
+  font-size: 56px;
+}
+
+/* Responsive: skala proporsional terhadap lebar viewport (vMix 1920x1080) */
+@media (max-width: 1400px) {
+  :root {
+    --score-size: 52px;
+    --name-size: 26px;
+  }
+
+  .team {
+    min-width: 220px;
+    padding: 0 18px;
+  }
+
+  .center {
+    padding: 0 20px;
+  }
+
+  .scoreboard {
+    min-height: 74px;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --score-size: 40px;
+    --name-size: 20px;
+  }
+
+  .team {
+    min-width: 150px;
+    gap: 10px;
+    padding: 0 12px;
+  }
+
+  .team-score {
+    min-width: 48px;
+  }
+
+  .center {
+    min-width: 90px;
+    padding: 0 12px;
+  }
+
+  .period {
+    font-size: 15px;
+  }
+
+  .clock {
+    font-size: 19px;
+  }
+
+  .scoreboard {
+    min-height: 58px;
+  }
+
+  .team-color {
+    height: 40px;
+  }
+
+  .set-item {
+    font-size: 15px;
+  }
+}
