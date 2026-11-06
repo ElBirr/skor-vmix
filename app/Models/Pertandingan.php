@@ -29,19 +29,50 @@ class Pertandingan extends Model
         'home_timeouts',
         'away_timeouts',
         'is_active',
+        'is_finished',
     ];
 
     protected $casts = [
         'set_scores' => 'array',
+        'home_score' => 'integer',
+        'away_score' => 'integer',
         'current_set' => 'integer',
         'home_timeouts' => 'integer',
         'away_timeouts' => 'integer',
         'is_active' => 'boolean',
+        'is_finished' => 'boolean',
     ];
 
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    public static function newMatch(): self
+    {
+        return new self([
+            'is_active' => true,
+            'is_finished' => false,
+            'sport' => 'volley',
+            'pos' => 'bottom',
+            'period' => 'SET 1',
+            'clock' => '',
+            'status' => 'LIVE',
+            'home_name' => 'TIM A',
+            'away_name' => 'TIM B',
+            'home_sub' => '',
+            'away_sub' => '',
+            'home_color' => '#e11d48',
+            'away_color' => '#2563eb',
+            'accent' => '#f59e0b',
+            'home_score' => 0,
+            'away_score' => 0,
+            'current_set' => 1,
+            'set_scores' => [],
+            'serving' => '',
+            'home_timeouts' => 0,
+            'away_timeouts' => 0,
+        ]);
     }
 
     public function setsWon(): array
@@ -58,6 +89,14 @@ class Pertandingan extends Model
         }
 
         return ['home' => $home, 'away' => $away];
+    }
+
+    public function isSetComplete(): bool
+    {
+        $target = count($this->set_scores ?? []) === 4 ? 15 : 25;
+
+        return max($this->home_score, $this->away_score) >= $target
+            && abs($this->home_score - $this->away_score) >= 2;
     }
 
     public function toOverlayArray(): array
@@ -90,6 +129,7 @@ class Pertandingan extends Model
             'sets' => $this->set_scores ?? [],
             'currentSet' => $this->current_set,
             'serving' => $this->serving,
+            'isFinished' => $this->is_finished,
         ];
     }
 }

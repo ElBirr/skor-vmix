@@ -1,0 +1,42 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('matches', function (Blueprint $table) {
+            $table->boolean('is_finished')->default(false)->after('is_active');
+        });
+
+        Schema::create('match_events', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('match_id')->constrained('matches')->cascadeOnDelete();
+            $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->string('type', 30);
+            $table->string('reason', 100)->nullable();
+            $table->json('before');
+            $table->json('after');
+            $table->string('ip_address', 45)->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('match_events');
+
+        Schema::table('matches', function (Blueprint $table) {
+            $table->dropColumn('is_finished');
+        });
+    }
+};

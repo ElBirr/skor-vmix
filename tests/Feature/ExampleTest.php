@@ -2,18 +2,20 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ExampleTest extends TestCase
 {
     use RefreshDatabase;
+
     /**
      * A basic test example.
      */
     public function test_can_create_match_when_none_exists(): void
     {
-        $response = $this->post('/match', [
+        $response = $this->actingAs(User::factory()->create())->post('/match', [
             'sport' => 'volley',
             'pos' => 'bottom',
             'period' => 'SET 1',

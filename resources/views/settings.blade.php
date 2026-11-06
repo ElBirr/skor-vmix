@@ -64,8 +64,11 @@
 <body>
   <div class="container">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-      <h1>Pengaturan Pertandingan &amp; Tim</h1>
-      <a href="{{ route('scoreboard') }}" class="btn btn-secondary">&larr; Kembali ke Layar Skor</a>
+      <h1>{{ $isNewMatch ? 'Siapkan Pertandingan Baru' : 'Pengaturan Pertandingan & Tim' }}</h1>
+      <div style="display:flex; gap:8px;">
+        <a href="{{ route('history') }}" class="btn btn-secondary">Riwayat</a>
+        @if (! $isNewMatch)<a href="{{ route('scoreboard') }}" class="btn btn-secondary">&larr; Layar Skor</a>@endif
+      </div>
     </div>
     <p class="subtitle">
       Overlay vMix: <a href="/overlay" target="_blank">/overlay</a> &mdash;
@@ -86,34 +89,6 @@
       </div>
     @endif
 
-    @if (!$match)
-      <div class="card" style="text-align: center; padding: 40px 20px;">
-        <h2 style="margin-bottom: 8px; color: #e6edf3;">Belum Ada Pertandingan Aktif</h2>
-        <p class="subtitle" style="margin-bottom: 24px;">Klik tombol di bawah untuk membuat dan memulai pertandingan baru secara instan.</p>
-        <form method="POST" action="{{ route('match.update') }}">
-          @csrf
-          <input type="hidden" name="sport" value="volley">
-          <input type="hidden" name="pos" value="bottom">
-          <input type="hidden" name="period" value="SET 1">
-          <input type="hidden" name="clock" value="">
-          <input type="hidden" name="status" value="LIVE">
-          <input type="hidden" name="home_name" value="TIM A">
-          <input type="hidden" name="away_name" value="TIM B">
-          <input type="hidden" name="home_sub" value="">
-          <input type="hidden" name="away_sub" value="">
-          <input type="hidden" name="home_color" value="#e11d48">
-          <input type="hidden" name="away_color" value="#2563eb">
-          <input type="hidden" name="accent" value="#f59e0b">
-          <input type="hidden" name="home_score" value="0">
-          <input type="hidden" name="away_score" value="0">
-          <input type="hidden" name="current_set" value="1">
-          <input type="hidden" name="serving" value="">
-          <input type="hidden" name="home_timeouts" value="0">
-          <input type="hidden" name="away_timeouts" value="0">
-          <button type="submit" class="btn">Mulai Pertandingan Baru</button>
-        </form>
-      </div>
-    @else
     <form method="POST" action="{{ route('match.update') }}">
       @csrf
 
@@ -174,30 +149,27 @@
       </div>
 
       <div class="card">
-        <h2>Opsi Tambahan (Voli)</h2>
-        <div class="row">
-          <div>
-            <label>Set Aktif (current_set)</label>
-            <input type="number" name="current_set" value="{{ $match->current_set }}" min="1" max="9" />
-          </div>
-          <div>
-            <label>Skor Set Sebelumnya (format: 25-23,25-20)</label>
-            <input type="text" name="set_scores_text"
-              value="@php
-                echo collect($match->set_scores ?? [])->map(fn ($s) => $s['home'].'-'.$s['away'])->implode(',');
-              @endphp"
-              placeholder="25-23,25-20" />
-          </div>
-        </div>
+        <h2>Opsi Tampilan</h2>
         <div style="margin-top: 14px;">
           <label>Warna Aksen (hex)</label>
           <input type="text" name="accent" value="{{ $match->accent }}" maxlength="7" />
         </div>
       </div>
 
-      <button type="submit" class="btn">Simpan Pengaturan</button>
-      <a href="{{ route('scoreboard') }}" class="btn btn-secondary" style="margin-left: 8px;">Selesai &amp; Kembali</a>
+      <button type="submit" class="btn">{{ $isNewMatch ? 'Mulai Pertandingan' : 'Simpan Pengaturan' }}</button>
+      @if (! $isNewMatch)<a href="{{ route('scoreboard') }}" class="btn btn-secondary" style="margin-left: 8px;">Selesai &amp; Kembali</a>@endif
     </form>
+    @if (! $isNewMatch)
+    <div class="card">
+      <h2>10 Perubahan Terakhir</h2>
+      @forelse ($events as $event)
+        <p style="margin-bottom:8px; font-size:13px; color:#8b949e;">
+          {{ $event->created_at->format('H:i:s') }} — {{ $event->user?->name ?? 'Operator dihapus' }}: {{ str_replace('_', ' ', $event->type) }}@if ($event->reason) ({{ $event->reason }})@endif
+        </p>
+      @empty
+        <p class="subtitle" style="margin-bottom:0;">Belum ada perubahan tercatat.</p>
+      @endforelse
+    </div>
     @endif
   </div>
 </body>

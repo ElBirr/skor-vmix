@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Pertandingan;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -12,7 +13,7 @@ class MatchTest extends TestCase
 
     private function createMatch(): void
     {
-        $this->post('/match', [
+        $this->actingAs(User::factory()->create())->post('/match', [
             'sport' => 'volley',
             'pos' => 'bottom',
             'period' => 'SET 1',
@@ -68,7 +69,7 @@ class MatchTest extends TestCase
     {
         $this->createMatch();
 
-        $this->postJson('/match/score', ['side' => 'home', 'delta' => -1])->assertOk();
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => -1, 'reason' => 'Koreksi skor'])->assertOk();
         $this->assertSame(0, Pertandingan::active()->first()->home_score);
 
         foreach (range(1, 3) as $i) {
@@ -77,43 +78,119 @@ class MatchTest extends TestCase
         $this->assertSame(2, Pertandingan::active()->first()->away_timeouts);
 
         foreach (range(1, 3) as $i) {
-            $this->postJson('/match/timeout', ['side' => 'away', 'delta' => -1])->assertOk();
+            $this->postJson('/match/timeout', ['side' => 'away', 'delta' => -1, 'reason' => 'Koreksi timeout'])->assertOk();
         }
         $this->assertSame(0, Pertandingan::active()->first()->away_timeouts);
     }
 
-    public function test_win_set_records_set_and_advances(): void
+    public function test_volleyball_set_requires_a_two_point_lead(): void
     {
         $this->createMatch();
-        $this->postJson('/match/score', ['side' => 'away', 'delta' => 3]);
 
-        // tim away menang set dengan skor berjalan 0-3
-        $this->postJson('/match/set', ['side' => 'away'])->assertOk();
+        foreach (range(1, 24) as $i) {
+            $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
+            $this->postJson('/match/score', ['side' => 'away', 'delta' => 1])->assertOk();
+        }
+
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
         $m = Pertandingan::active()->first();
-        $this->assertSame([['home' => 0, 'away' => 3]], $m->set_scores);
+        $this->assertSame([], $m->set_scores);
+        $this->assertSame(25, $m->home_score);
+        $this->assertSame(24, $m->away_score);
+
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
+        $m = Pertandingan::active()->first();
+        $this->assertSame([['home' => 26, 'away' => 24]], $m->set_scores);
+        $this->assertSame(2, $m->current_set);
         $this->assertSame(0, $m->home_score);
         $this->assertSame(0, $m->away_score);
-        $this->assertSame(2, $m->current_set);
+    }
 
-        // skor imbang 0-0, set tetap diberi ke tim yang menekan
-        $this->postJson('/match/set', ['side' => 'home'])->assertOk();
-        $m = Pertandingan::active()->first();
-        $this->assertSame([['home' => 0, 'away' => 3], ['home' => 1, 'away' => 0]], $m->set_scores);
-        $this->assertSame(1, $m->setsWon()['home']);
-        $this->assertSame(1, $m->setsWon()['away']);
+    public function test_deciding_set_finishes_match_at_fifteen_with_two_point_lead(): void
+    {
+        $this->createMatch();
+        $match = Pertandingan::active()->first();
+        $match->update([
+            'set_scores' => [
+                ['home' => 25, 'away' => 20],
+                ['home' => 20, 'away' => 25],
+                ['home' => 25, 'away' => 20],
+                ['home' => 20, 'away' => 25],
+            ],
+            'current_set' => 5,
+            'home_score' => 14,
+            'away_score' => 13,
+        ]);
 
-        // minus home: batalkan set terakhir milik home (1-0), skornya jadi skor berjalan lagi
-        $this->postJson('/match/set', ['side' => 'home', 'delta' => -1])->assertOk();
-        $m = Pertandingan::active()->first();
-        $this->assertSame([['home' => 0, 'away' => 3]], $m->set_scores);
-        $this->assertSame(2, $m->current_set);
-        $this->assertSame(1, $m->home_score);
-        $this->assertSame(0, $m->away_score);
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
 
-        // minus home lagi: set tersisa milik away — tidak dihapus, tidak ada error
-        $this->postJson('/match/set', ['side' => 'home', 'delta' => -1])->assertOk();
-        $m = Pertandingan::active()->first();
-        $this->assertSame([['home' => 0, 'away' => 3]], $m->set_scores);
-        $this->assertSame(2, $m->current_set);
+        $match->refresh();
+        $this->assertTrue($match->is_finished);
+        $this->assertSame('SELESAI', $match->status);
+        $this->assertSame(['home' => 15, 'away' => 13], $match->set_scores[4]);
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertUnprocessable();
+    }
+
+    public function test_score_correction_requires_a_reason_and_is_audited(): void
+    {
+        $this->createMatch();
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => -1])->assertUnprocessable();
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => -1, 'reason' => 'Tombol terpencet'])->assertOk();
+
+        $this->assertDatabaseHas('match_events', [
+            'type' => 'score_corrected',
+            'reason' => 'Tombol terpencet',
+        ]);
+    }
+
+    public function test_finishing_a_match_archives_it_and_opens_new_match_settings(): void
+    {
+        $this->createMatch();
+        $match = Pertandingan::active()->first();
+
+        $this->post('/match/finish')->assertRedirect('/settings');
+
+        $this->assertDatabaseHas('matches', [
+            'id' => $match->id,
+            'is_active' => 0,
+            'is_finished' => 1,
+            'status' => 'SELESAI',
+        ]);
+        $this->assertDatabaseHas('match_events', ['match_id' => $match->id, 'type' => 'match_finished']);
+        $this->get('/history')->assertOk()->assertSee('TIM A');
+        $this->get('/history/'.$match->id)->assertOk()->assertSee('TIM A')->assertSee('match finished');
+        $this->get('/settings')->assertOk()->assertSee('Siapkan Pertandingan Baru');
+    }
+
+    public function test_new_match_keeps_finished_match_in_history(): void
+    {
+        $this->createMatch();
+        $finishedMatch = Pertandingan::active()->first();
+        $this->post('/match/finish');
+
+        $this->post('/match', [
+            'sport' => 'futsal',
+            'pos' => 'top',
+            'period' => '1H',
+            'clock' => '20:00',
+            'status' => 'LIVE',
+            'home_name' => 'TIM BARU A',
+            'away_name' => 'TIM BARU B',
+            'home_sub' => '',
+            'away_sub' => '',
+            'home_color' => '#e11d48',
+            'away_color' => '#2563eb',
+            'accent' => '#f59e0b',
+        ])->assertRedirect();
+
+        $this->assertDatabaseHas('matches', ['id' => $finishedMatch->id, 'is_active' => 0, 'is_finished' => 1]);
+        $this->assertDatabaseCount('matches', 2);
+        $this->assertSame('TIM BARU A', Pertandingan::active()->first()->home_name);
+    }
+
+    public function test_score_controls_require_an_authenticated_operator(): void
+    {
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertUnauthorized();
     }
 }

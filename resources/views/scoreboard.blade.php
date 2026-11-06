@@ -287,7 +287,10 @@
       </div>
       <div class="topbar-right">
         <a href="{{ route('overlay') }}" target="_blank" class="btn-link">🖥️ vMix Overlay</a>
+        <a href="{{ route('history') }}" class="btn-link">📜 Riwayat</a>
         <a href="{{ route('settings') }}" class="btn-link">⚙️ Pengaturan Tim</a>
+        <form method="POST" action="{{ route('match.finish') }}" onsubmit="return confirm('Selesaikan pertandingan? Data akan masuk ke riwayat.')">@csrf<button type="submit" class="btn-link">Selesai Pertandingan</button></form>
+        <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="btn-link">Keluar</button></form>
       </div>
     </div>
 
@@ -302,10 +305,6 @@
           <div class="team-sub" id="homeSubOut">{{ $match->home_sub }}</div>
           @if($match->sport === 'volley')
             <div class="set-won"><b id="homeSetWon">{{ $sw['home'] }}</b> SET</div>
-            <div class="set-row">
-              <button type="button" class="btn-set" data-set="home" data-delta="-1">&minus; Set</button>
-              <button type="button" class="btn-set" data-set="home" data-delta="1">+ Set</button>
-            </div>
           @endif
         </div>
 
@@ -328,10 +327,6 @@
           <div class="team-sub" id="awaySubOut">{{ $match->away_sub }}</div>
           @if($match->sport === 'volley')
             <div class="set-won"><b id="awaySetWon">{{ $sw['away'] }}</b> SET</div>
-            <div class="set-row">
-              <button type="button" class="btn-set" data-set="away" data-delta="-1">&minus; Set</button>
-              <button type="button" class="btn-set" data-set="away" data-delta="1">+ Set</button>
-            </div>
           @endif
         </div>
 
@@ -442,7 +437,10 @@
         if (btn.disabled) return;
         btn.disabled = true;
         try {
-          const res = await postJson('{{ route('match.score') }}', { side: btn.dataset.side, delta: parseInt(btn.dataset.delta, 10) });
+          const delta = parseInt(btn.dataset.delta, 10);
+          const reason = delta < 0 ? prompt('Alasan koreksi skor:') : null;
+          if (delta < 0 && !reason) return;
+          const res = await postJson('{{ route('match.score') }}', { side: btn.dataset.side, delta, reason });
           if (res) applyState(res);
         } finally {
           btn.disabled = false;
@@ -456,7 +454,10 @@
         if (btn.disabled) return;
         btn.disabled = true;
         try {
-          const res = await postJson('{{ route('match.timeout') }}', { side: btn.dataset.timeout, delta: parseInt(btn.dataset.delta, 10) });
+          const delta = parseInt(btn.dataset.delta, 10);
+          const reason = delta < 0 ? prompt('Alasan koreksi timeout:') : null;
+          if (delta < 0 && !reason) return;
+          const res = await postJson('{{ route('match.timeout') }}', { side: btn.dataset.timeout, delta, reason });
           if (res) applyState(res);
         } finally {
           btn.disabled = false;
@@ -478,20 +479,6 @@
         if (res) applyState(res);
       });
     }
-
-    // +/- Set: catat/batalkan set untuk tim (minus mengembalikan skor set tsb)
-    document.querySelectorAll('button[data-set]').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (btn.disabled) return;
-        btn.disabled = true;
-        try {
-          const res = await postJson('{{ route('match.set') }}', { side: btn.dataset.set, delta: parseInt(btn.dataset.delta, 10) });
-          if (res) applyState(res);
-        } finally {
-          btn.disabled = false;
-        }
-      });
-    });
 
     // Sinkron dari server (perubahan settings / perangkat lain)
     setInterval(refresh, 1000);

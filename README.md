@@ -39,6 +39,7 @@ Papan skor lapangan untuk voli dan futsal, lengkap dengan overlay broadcast untu
 composer install
 cp .env.example .env
 php artisan key:generate
+php -r "file_exists('database/database.sqlite') || touch('database/database.sqlite');"
 php artisan migrate
 php artisan serve
 ```
@@ -47,5 +48,5 @@ Buka `http://localhost:8000` untuk layar operator, `/settings` untuk pengaturan,
 
 ## Catatan
 
-- Belum ada autentikasi. Jalankan hanya di jaringan lokal/terpercaya atau tambahkan proteksi sebelum dipublikasikan.
+- Buat operator pertama di `/register`, lalu masuk sebelum mengubah skor. Overlay dan API hanya-baca tetap dapat dibuka tanpa login.
 - Data disimpan di SQLite (`database/database.sqlite`).
