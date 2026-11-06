@@ -72,7 +72,7 @@
     return {
       sport: "volley",
       pos: "bottom",
-      accent: "#f5a623",
+      accent: "#c00000",
       home: { name: "HOME", sub: "", score: 0, color: "#2563eb", setsWon: 0, timeouts: 0 },
       away: { name: "AWAY", sub: "", score: 0, color: "#dc2626", setsWon: 0, timeouts: 0 },
       period: "SET 1",

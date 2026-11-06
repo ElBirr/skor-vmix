@@ -10,37 +10,39 @@
 <body>
   <div id="overlay" class="overlay pos-bottom sport-volley" hidden>
     <div class="scoreboard" id="scoreboard">
+      <div class="headline">
+        <span class="headline-label" id="period">SET 1</span>
+        <span class="headline-clock" id="clock"></span>
+        <span class="headline-status" id="status"></span>
+      </div>
+
       <div class="team team-home" id="homeTeam">
-        <span class="serve-mark" id="homeServe" aria-hidden="true"></span>
+        <span class="team-score" id="homeScore">0</span>
         <span class="team-color" id="homeColor"></span>
         <div class="team-info">
           <span class="team-name" id="homeName">HOME</span>
-          <span class="team-meta">
-            <span class="sets-won" id="homeSetsWon"></span>
-            <span class="timeout-dots" id="homeTimeouts"></span>
-          </span>
           <span class="team-sub" id="homeSub"></span>
         </div>
-        <span class="team-score" id="homeScore">0</span>
+        <span class="team-meta">
+          <span class="sets-won" id="homeSetsWon"></span>
+          <span class="timeout-dots" id="homeTimeouts"></span>
+        </span>
+        <span class="serve-mark" id="homeServe" aria-hidden="true"></span>
       </div>
 
-      <div class="center">
-        <span class="period" id="period">SET 1</span>
-        <span class="clock" id="clock"></span>
-        <span class="status" id="status"></span>
-      </div>
+      <div class="board-divider"></div>
 
       <div class="team team-away" id="awayTeam">
         <span class="team-score" id="awayScore">0</span>
+        <span class="team-color" id="awayColor"></span>
         <div class="team-info">
           <span class="team-name" id="awayName">AWAY</span>
-          <span class="team-meta">
-            <span class="sets-won" id="awaySetsWon"></span>
-            <span class="timeout-dots" id="awayTimeouts"></span>
-          </span>
           <span class="team-sub" id="awaySub"></span>
         </div>
-        <span class="team-color" id="awayColor"></span>
+        <span class="team-meta">
+          <span class="sets-won" id="awaySetsWon"></span>
+          <span class="timeout-dots" id="awayTimeouts"></span>
+        </span>
         <span class="serve-mark" id="awayServe" aria-hidden="true"></span>
       </div>
     </div>

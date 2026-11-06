@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Masuk - {{ config('app.name') }}</title>
-  <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
+  <link rel="stylesheet" href="{{ asset('css/theme.css') }}">
 </head>
-<body>
+<body class="auth-body">
   <main class="auth-card">
     <h1>Masuk operator</h1>
     <p class="subtitle">Masuk untuk mengubah skor pertandingan.</p>
@@ -17,7 +17,7 @@
       @csrf
       <label>Email <input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus></label>
       <label>Kata sandi <input type="password" name="password" autocomplete="current-password" required></label>
-      <button type="submit">Masuk</button>
+      <button type="submit" class="btn">Masuk</button>
     </form>
     @if ($needsSetup)
       <p class="auth-link"><a href="{{ route('register') }}">Buat operator pertama</a></p>

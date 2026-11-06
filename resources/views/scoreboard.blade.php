@@ -5,156 +5,157 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="csrf-token" content="{{ csrf_token() }}" />
   <title>Skor Lapangan - {{ config('app.name') }}</title>
+  <link rel="stylesheet" href="{{ asset('css/theme.css') }}" />
   <style>
+    :root {
+      --gt-red: #c00000;
+      --gt-navy: #001c54;
+      --gt-deep: #000c22;
+      --gt-silver: #d9d9d9;
+      --gt-line: rgba(255, 255, 255, 0.55);
+      --team-color: #c00000;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
     body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: #090d16;
-      color: #f0f6fc;
+      font-family: var(--gt-font);
+      background: var(--gt-deep);
+      background-image: radial-gradient(circle at 50% 0, rgba(0, 28, 84, 0.95), transparent 65%);
+      color: #fff;
       height: 100vh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      letter-spacing: 0.02em;
     }
+
     /* Top Bar */
     .topbar {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: #111827;
-      border-bottom: 1px solid #1f2937;
-      padding: 10px 16px;
-      height: 56px;
-    }
-    .topbar-left, .topbar-right {
-      display: flex;
-      align-items: center;
       gap: 12px;
+      background: var(--gt-navy);
+      border-bottom: 2px solid #fff;
+      padding: 10px 16px;
+      min-height: 58px;
+      overflow-x: auto;
     }
+    .topbar-left, .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
     .badge {
-      background: #1f2937;
-      color: #9ca3af;
+      background: transparent;
+      color: var(--gt-silver);
       padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
-    .badge.live { background: #7f1d1d; color: #fca5a5; }
-    .btn-link {
-      background: #1f2937;
-      color: #e5e7eb;
-      text-decoration: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+      border: 2px solid var(--gt-line);
       font-size: 13px;
-      font-weight: 600;
-      border: 1px solid #374151;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .badge.live { background: var(--gt-red); border-color: #fff; color: #fff; }
+    .btn-link {
+      background: transparent;
+      color: #fff;
+      text-decoration: none;
+      padding: 7px 12px;
+      border: 2px solid var(--gt-line);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
       display: inline-flex;
       align-items: center;
       gap: 6px;
+      cursor: pointer;
+      white-space: nowrap;
     }
-    .btn-link:active { background: #374151; }
+    .btn-link:hover, .btn-link:active { background: rgba(255, 255, 255, 0.14); border-color: #fff; }
 
     /* Main Arena */
     .arena {
       flex: 1;
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      padding: 12px;
-      height: calc(100vh - 130px);
+      gap: 16px;
+      padding: 16px;
+      min-height: 0;
     }
     .team-panel {
-      background: #111827;
-      border: 2px solid #1f2937;
-      border-radius: 12px;
+      background: var(--gt-panel);
+      border: 2px solid #fff;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding: 16px;
-      position: relative;
+      min-height: 0;
       overflow: hidden;
     }
+    .team-strip { height: 8px; background: var(--team-color); flex-shrink: 0; }
     .team-header {
       text-align: center;
+      padding: 12px 16px;
+      background: var(--gt-red);
+      border-bottom: 2px solid #fff;
+      flex-shrink: 0;
     }
     .team-name {
+      color: #fff;
       font-size: 24px;
       font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 0.05em;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
       margin-bottom: 2px;
     }
     .team-sub {
-      font-size: 13px;
-      color: #9ca3af;
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.75);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      min-height: 14px;
     }
-    .set-won {
-      margin-top: 6px;
-      font-size: 13px;
-      color: #8b949e;
-      letter-spacing: 1px;
-    }
-    .set-won b { font-size: 20px; color: #f0f6fc; }
-    .set-row {
-      display: flex;
-      gap: 6px;
-      justify-content: center;
-      margin-top: 6px;
-    }
-    .btn-set {
-      padding: 6px 14px;
-      background: #1f2937;
-      border: 1px solid #374151;
-      color: #e5e7eb;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-    .btn-set:active { background: #374151; }
-    .btn-set[data-delta="-1"] { color: #f87171; }
+    .set-won { margin-top: 4px; font-size: 12px; color: rgba(255, 255, 255, 0.75); letter-spacing: 0.08em; }
+    .set-won b { font-size: 20px; color: #fff; }
     .serve-indicator {
       display: inline-block;
       width: 10px;
       height: 10px;
-      border-radius: 50%;
-      background: #374151;
+      background: rgba(255, 255, 255, 0.3);
+      border: 2px solid #fff;
       margin-right: 6px;
-      vertical-align: middle;
+      vertical-align: baseline;
     }
-    .serving .serve-indicator {
-      background: #10b981;
-      box-shadow: 0 0 10px #10b981;
-    }
+    .serving .serve-indicator { background: #fff; }
 
     /* Score Display & Big Buttons */
     .score-display {
-      text-align: center;
-      margin: auto 0;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      background: rgba(0, 12, 34, 0.35);
     }
     .score-value {
-      font-size: min(28vw, 160px);
+      font-size: min(26vw, 170px);
       font-weight: 900;
-      line-height: 1;
+      line-height: 0.85;
       font-variant-numeric: tabular-nums;
-      margin: 8px 0;
+      color: #fff;
     }
     .score-buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 8px;
+      border-top: 2px solid #fff;
+      flex-shrink: 0;
     }
     .btn-score {
-      background: #1f2937;
+      background: var(--gt-navy);
       color: #fff;
-      border: none;
-      border-radius: 10px;
+      border: 0;
+      border-radius: 0;
+      font-family: inherit;
       font-size: 36px;
       font-weight: 800;
       padding: 20px 0;
@@ -162,78 +163,73 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
     }
-    .btn-score:active { transform: scale(0.97); }
-    .btn-minus { background: #374151; color: #f87171; font-size: 28px; }
-    .btn-plus { background: #2563eb; color: #fff; }
-    .btn-plus:active { background: #1d4ed8; }
+    .btn-score:active { filter: brightness(1.15); }
+    .btn-minus { background: var(--gt-navy); color: var(--gt-silver); border-right: 2px solid #fff; }
+    .btn-plus { background: var(--gt-red); }
 
     /* Bottom Control Bar */
     .bottombar {
-      background: #111827;
-      border-top: 1px solid #1f2937;
+      background: var(--gt-navy);
+      border-top: 2px solid #fff;
       padding: 10px 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      height: 74px;
+      gap: 12px;
+      min-height: 74px;
+      flex-wrap: wrap;
     }
-    .controls-group {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
+    .controls-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
     .ctrl-btn {
-      background: #1f2937;
-      color: #e5e7eb;
-      border: 1px solid #374151;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 14px;
+      background: transparent;
+      color: #fff;
+      border: 2px solid var(--gt-line);
+      padding: 9px 14px;
+      font-family: inherit;
+      font-size: 13px;
       font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
       cursor: pointer;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 2px;
     }
-    .ctrl-btn:active { background: #374151; }
-    .ctrl-btn span { font-size: 11px; color: #9ca3af; font-weight: normal; }
+    .ctrl-btn span { font-size: 10px; color: var(--gt-silver); font-weight: 600; letter-spacing: 0.04em; }
+    .ctrl-btn:active { background: rgba(255, 255, 255, 0.14); }
     .timeout-box {
       display: flex;
       align-items: center;
       gap: 8px;
-      background: #1f2937;
-      border: 1px solid #374151;
-      border-radius: 8px;
+      border: 2px solid var(--gt-line);
       padding: 6px 10px;
     }
-    .timeout-label { font-size: 13px; color: #9ca3af; white-space: nowrap; }
-    .timeout-label b { color: #f0f6fc; }
+    .timeout-label { font-size: 12px; color: var(--gt-silver); text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; }
+    .timeout-label b { color: #fff; }
     .mini {
-      width: 40px; height: 40px;
-      border: 1px solid #374151;
-      background: #374151;
-      color: #f87171;
-      border-radius: 6px;
+      width: 38px; height: 38px;
+      border: 2px solid var(--gt-line);
+      background: transparent;
+      color: var(--gt-silver);
+      font-family: inherit;
       font-size: 20px;
       font-weight: 800;
       cursor: pointer;
       line-height: 1;
     }
-    .mini.plus { background: #2563eb; border-color: #2563eb; color: #fff; }
-    .mini:active { opacity: 0.8; }
+    .mini.plus { background: var(--gt-red); border-color: #fff; color: #fff; }
+    .mini:active { opacity: 0.75; }
     #toast {
       position: fixed;
       bottom: 90px;
       left: 50%;
       transform: translateX(-50%);
-      background: #7f1d1d;
-      color: #fecaca;
-      border: 1px solid #b91c1c;
+      background: var(--gt-red);
+      color: #fff;
+      border: 2px solid #fff;
       padding: 10px 20px;
-      border-radius: 8px;
       font-size: 15px;
       font-weight: 700;
       display: none;
@@ -250,17 +246,34 @@
       text-align: center;
       padding: 24px;
     }
+    .empty-screen p { color: var(--gt-silver); margin: 8px 0 20px; }
     .btn-primary {
-      background: #2563eb;
+      background: var(--gt-red);
       color: #fff;
-      padding: 14px 28px;
-      border-radius: 8px;
-      font-size: 16px;
-      font-weight: 700;
+      padding: 12px 24px;
+      border: 2px solid #fff;
+      font-family: inherit;
+      font-size: 15px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
       text-decoration: none;
-      border: none;
       cursor: pointer;
       margin-top: 16px;
+    }
+
+    @media (max-width: 900px) {
+      .arena { gap: 10px; padding: 10px; }
+      .team-name { font-size: 18px; }
+      .score-value { font-size: min(24vw, 120px); }
+      .btn-score { font-size: 28px; padding: 16px 0; }
+      .bottombar { min-height: auto; }
+    }
+    @media (max-width: 560px) {
+      .btn-score { font-size: 24px; padding: 12px 0; }
+      .timeout-box { padding: 4px 6px; gap: 5px; }
+      .mini { width: 32px; height: 32px; font-size: 17px; }
+      .ctrl-btn { padding: 7px 10px; }
     }
   </style>
 </head>
@@ -268,7 +281,7 @@
   @if (!$match)
     <div class="empty-screen">
       <h2 style="font-size: 24px; margin-bottom: 8px;">Belum Ada Pertandingan Aktif</h2>
-      <p style="color: #9ca3af; margin-bottom: 20px;">Silakan buat atau aktifkan pertandingan melalui menu pengaturan.</p>
+      <p>Silakan buat atau aktifkan pertandingan melalui menu pengaturan.</p>
       <a href="{{ route('settings') }}" class="btn-primary">Buka Pengaturan &amp; Buat Pertandingan</a>
     </div>
   @else
@@ -282,13 +295,13 @@
           <span class="badge" id="setBadge">Set {{ $match->current_set }} &middot; {{ $sw['home'] }}-{{ $sw['away'] }}</span>
         @endif
         @if($match->clock)
-          <span class="badge" id="clockBadge" style="font-family: monospace;">{{ $match->clock }}</span>
+          <span class="badge" id="clockBadge" style="font-variant-numeric: tabular-nums;">{{ $match->clock }}</span>
         @endif
       </div>
       <div class="topbar-right">
-        <a href="{{ route('overlay') }}" target="_blank" class="btn-link">🖥️ vMix Overlay</a>
-        <a href="{{ route('history') }}" class="btn-link">📜 Riwayat</a>
-        <a href="{{ route('settings') }}" class="btn-link">⚙️ Pengaturan Tim</a>
+        <a href="{{ route('overlay') }}" target="_blank" class="btn-link">vMix Overlay</a>
+        <a href="{{ route('history') }}" class="btn-link">Riwayat</a>
+        <a href="{{ route('settings') }}" class="btn-link">Pengaturan Tim</a>
         <form method="POST" action="{{ route('match.finish') }}" onsubmit="return confirm('Selesaikan pertandingan? Data akan masuk ke riwayat.')">@csrf<button type="submit" class="btn-link">Selesai Pertandingan</button></form>
         <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="btn-link">Keluar</button></form>
       </div>
@@ -297,9 +310,10 @@
     <!-- Arena / Skor Utama -->
     <div class="arena">
       <!-- HOME TEAM -->
-      <div class="team-panel @if($match->serving === 'home') serving @endif" id="homePanel">
+      <div class="team-panel @if($match->serving === 'home') serving @endif" id="homePanel" style="--team-color: {{ $match->home_color ?: '#c00000' }}">
+        <div class="team-strip"></div>
         <div class="team-header">
-          <div class="team-name" style="color: {{ $match->home_color ?: '#f87171' }}">
+          <div class="team-name">
             <span class="serve-indicator"></span><span id="homeNameOut">{{ $match->home_name }}</span>
           </div>
           <div class="team-sub" id="homeSubOut">{{ $match->home_sub }}</div>
@@ -309,7 +323,7 @@
         </div>
 
         <div class="score-display">
-          <div class="score-value" id="homeScoreOut" style="color: {{ $match->home_color ?: '#f87171' }}">{{ $match->home_score }}</div>
+          <div class="score-value" id="homeScoreOut">{{ $match->home_score }}</div>
         </div>
 
         <div class="score-buttons">
@@ -319,9 +333,10 @@
       </div>
 
       <!-- AWAY TEAM -->
-      <div class="team-panel @if($match->serving === 'away') serving @endif" id="awayPanel">
+      <div class="team-panel @if($match->serving === 'away') serving @endif" id="awayPanel" style="--team-color: {{ $match->away_color ?: '#c00000' }}">
+        <div class="team-strip"></div>
         <div class="team-header">
-          <div class="team-name" style="color: {{ $match->away_color ?: '#60a5fa' }}">
+          <div class="team-name">
             <span class="serve-indicator"></span><span id="awayNameOut">{{ $match->away_name }}</span>
           </div>
           <div class="team-sub" id="awaySubOut">{{ $match->away_sub }}</div>
@@ -331,7 +346,7 @@
         </div>
 
         <div class="score-display">
-          <div class="score-value" id="awayScoreOut" style="color: {{ $match->away_color ?: '#60a5fa' }}">{{ $match->away_score }}</div>
+          <div class="score-value" id="awayScoreOut">{{ $match->away_score }}</div>
         </div>
 
         <div class="score-buttons">
@@ -346,7 +361,7 @@
       <div class="controls-group">
         @if($match->sport === 'volley')
           <button type="button" class="ctrl-btn" id="toggleServeBtn">
-            🏐 Pindah Serve
+            Pindah Serve
             <span id="servingOut">Serve: {{ strtoupper($match->serving ?: '-') }}</span>
           </button>
         @endif
@@ -417,8 +432,7 @@
         document.getElementById(side + 'TimeoutOut').textContent = t.timeouts + ' / 2';
         document.getElementById(side + 'NameOut').textContent = t.name;
         document.getElementById(side + 'SubOut').textContent = t.sub;
-        document.getElementById(side + 'NameOut').style.color = t.color || '';
-        document.getElementById(side + 'ScoreOut').style.color = t.color || '';
+        document.getElementById(side + 'Panel').style.setProperty('--team-color', t.color || '#c00000');
         const setWon = document.getElementById(side + 'SetWon');
         if (setWon) setWon.textContent = t.setsWon;
       }

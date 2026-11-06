@@ -64,7 +64,7 @@ class Pertandingan extends Model
             'away_sub' => '',
             'home_color' => '#e11d48',
             'away_color' => '#2563eb',
-            'accent' => '#f59e0b',
+            'accent' => '#c00000',
             'home_score' => 0,
             'away_score' => 0,
             'current_set' => 1,
