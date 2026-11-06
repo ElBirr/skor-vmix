@@ -52,6 +52,21 @@ php artisan serve
 
 Buka `http://localhost:8000` untuk layar operator, `/settings` untuk pengaturan, dan `/overlay` untuk overlay vMix.
 
+## Akses dari perangkat lain (WiFi)
+
+Server mendengarkan semua interface (`SERVER_HOST=0.0.0.0`), jadi HP wasit atau komputer vMix lain di WiFi yang sama bisa membuka aplikasi.
+
+1. Jalankan `composer dev` (atau `php artisan serve`) di komputer server.
+2. Cari IPv4 komputer server dengan `ipconfig`, misalnya `192.168.110.43`.
+3. Di perangkat lain buka `http://192.168.110.43:8000` (layar skor) atau `http://192.168.110.43:8000/overlay` (vMix Browser Input).
+4. Jika tidak bisa dibuka, izinkan port 8000 di Windows Firewall pada profil Private. Jalankan PowerShell sebagai Administrator:
+
+   ```powershell
+   netsh advfirewall firewall add rule name="Skor VMix 8000" dir=in action=allow protocol=TCP localport=8000
+   ```
+
+Pastikan komputer server dan perangkat lain berada di jaringan WiFi yang sama, dan jaringan diberi tanda "Private" (bukan "Public") di Windows.
+
 ## Catatan
 
 - Buat operator pertama di `/register`, lalu masuk sebelum mengubah skor. Overlay dan API hanya-baca tetap dapat dibuka tanpa login.
