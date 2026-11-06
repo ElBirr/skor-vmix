@@ -17,7 +17,6 @@ class ExampleTest extends TestCase
     {
         $response = $this->actingAs(User::factory()->create())->post('/match', [
             'sport' => 'volley',
-            'pos' => 'bottom',
             'period' => 'SET 1',
             'clock' => '',
             'status' => 'LIVE',

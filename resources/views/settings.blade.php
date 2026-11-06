@@ -13,8 +13,10 @@
       <div>
         <h1>{{ $isNewMatch ? 'Siapkan Pertandingan Baru' : 'Pengaturan Pertandingan & Tim' }}</h1>
         <p class="subtitle">
-          Overlay vMix: <a href="{{ route('overlay') }}" target="_blank">{{ route('overlay') }}</a> &mdash;
-          Gunakan URL ini di Browser Input vMix (1920&times;1080).
+          Overlay vMix (1920&times;1080):
+          <a href="{{ route('overlay') }}" target="_blank">{{ route('overlay') }}</a> live &middot;
+          <a href="{{ route('overlay') }}?scene=start" target="_blank">?scene=start</a> mulai &middot;
+          <a href="{{ route('overlay') }}?scene=end" target="_blank">?scene=end</a> selesai.
         </p>
       </div>
       <div class="actions">
@@ -50,13 +52,6 @@
               <option value="futsal" @selected($match->sport === 'futsal')>Futsal</option>
             </select>
           </div>
-          <div>
-            <label>Posisi Overlay</label>
-            <select name="pos">
-              <option value="bottom" @selected($match->pos === 'bottom')>Bawah</option>
-              <option value="top" @selected($match->pos === 'top')>Atas</option>
-            </select>
-          </div>
         </div>
         <div class="row-3">
           <div>
@@ -82,6 +77,8 @@
             <input type="text" name="home_name" value="{{ $match->home_name }}" maxlength="50" required />
             <label>Pelatih / Sub (Home)</label>
             <input type="text" name="home_sub" value="{{ $match->home_sub }}" maxlength="50" />
+            <label>Logo Home (URL)</label>
+            <input type="text" name="home_logo" value="{{ $match->home_logo }}" maxlength="2048" placeholder="https://..." />
             <label>Warna Home (hex)</label>
             <input type="text" name="home_color" value="{{ $match->home_color }}" maxlength="7" />
           </div>
@@ -90,6 +87,8 @@
             <input type="text" name="away_name" value="{{ $match->away_name }}" maxlength="50" required />
             <label>Pelatih / Sub (Away)</label>
             <input type="text" name="away_sub" value="{{ $match->away_sub }}" maxlength="50" />
+            <label>Logo Away (URL)</label>
+            <input type="text" name="away_logo" value="{{ $match->away_logo }}" maxlength="2048" placeholder="https://..." />
             <label>Warna Away (hex)</label>
             <input type="text" name="away_color" value="{{ $match->away_color }}" maxlength="7" />
           </div>
@@ -98,8 +97,8 @@
 
       <div class="card">
         <h2>Opsi Tampilan</h2>
-        <label>Warna Aksen (hex)</label>
-        <input type="text" name="accent" value="{{ $match->accent }}" maxlength="7" />
+        <label>Logo Event / Turnamen (URL)</label>
+        <input type="text" name="logo" value="{{ $match->logo }}" maxlength="2048" placeholder="https://..." />
       </div>
 
       <button type="submit" class="btn">{{ $isNewMatch ? 'Mulai Pertandingan' : 'Simpan Pengaturan' }}</button>

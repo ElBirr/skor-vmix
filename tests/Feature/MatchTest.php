@@ -16,7 +16,6 @@ class MatchTest extends TestCase
     {
         $this->actingAs(User::factory()->create())->post('/match', [
             'sport' => 'volley',
-            'pos' => 'bottom',
             'period' => 'SET 1',
             'clock' => '',
             'status' => 'LIVE',
@@ -44,7 +43,6 @@ class MatchTest extends TestCase
         // form settings tidak lagi mengirim skor/timeout/serving
         $this->post('/match', [
             'sport' => 'volley',
-            'pos' => 'bottom',
             'period' => 'SET 1',
             'status' => 'LIVE',
             'home_name' => 'INDONESIA',
@@ -172,7 +170,6 @@ class MatchTest extends TestCase
 
         $this->post('/match', [
             'sport' => 'futsal',
-            'pos' => 'top',
             'period' => '1H',
             'clock' => '20:00',
             'status' => 'LIVE',
@@ -201,7 +198,6 @@ class MatchTest extends TestCase
 
         $this->from('/settings')->post('/match', [
             'sport' => 'volley',
-            'pos' => 'bottom',
             'period' => 'SET 1',
             'status' => 'LIVE',
             'home_name' => 'TIM A',
@@ -222,7 +218,6 @@ class MatchTest extends TestCase
 
         $this->from('/settings')->post('/match', [
             'sport' => 'volley',
-            'pos' => 'bottom',
             'period' => 'SET 1',
             'status' => 'LIVE',
             'home_name' => 'DIUBAH',
@@ -262,5 +257,50 @@ class MatchTest extends TestCase
 
         $this->assertDatabaseCount('matches', 1);
         $this->assertSame('TIM A', Pertandingan::active()->first()->home_name);
+    }
+
+    public function test_overlay_renders_scorebug_and_intro_scenes(): void
+    {
+        $this->get('/overlay')
+            ->assertOk()
+            ->assertSee('id="scorebug"', false)
+            ->assertSee('id="intro"', false);
+    }
+
+    public function test_end_scene_falls_back_to_the_latest_finished_match(): void
+    {
+        $this->createMatch();
+        $this->post('/match/finish');
+
+        $this->getJson('/api/match')->assertNotFound();
+        $this->getJson('/api/match?latest=1')
+            ->assertOk()
+            ->assertJsonPath('home.name', 'TIM A')
+            ->assertJsonPath('isFinished', true);
+    }
+
+    public function test_logo_urls_are_saved_and_exposed_to_the_overlay(): void
+    {
+        $this->createMatch();
+
+        $this->post('/match', [
+            'sport' => 'volley',
+            'period' => 'SET 1',
+            'status' => 'LIVE',
+            'home_name' => 'TIM A',
+            'away_name' => 'TIM B',
+            'home_color' => '#e11d48',
+            'away_color' => '#2563eb',
+            'accent' => '#c00000',
+            'logo' => 'https://example.com/event.png',
+            'home_logo' => 'https://example.com/home.png',
+            'away_logo' => '/logos/away.png',
+        ])->assertRedirect();
+
+        $this->getJson('/api/match')
+            ->assertOk()
+            ->assertJsonPath('logo', 'https://example.com/event.png')
+            ->assertJsonPath('home.logo', 'https://example.com/home.png')
+            ->assertJsonPath('away.logo', '/logos/away.png');
     }
 }

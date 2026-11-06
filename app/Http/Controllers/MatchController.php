@@ -10,9 +10,14 @@ use Illuminate\Validation\ValidationException;
 
 class MatchController extends Controller
 {
-    public function current()
+    public function current(Request $request)
     {
         $match = Pertandingan::active()->first();
+
+        // Scene selesai: pertandingan sudah diarsipkan, ambil yang terakhir.
+        if (! $match && $request->boolean('latest')) {
+            $match = Pertandingan::where('is_finished', true)->latest('updated_at')->first();
+        }
 
         if (! $match) {
             return response()->json(null, 404);
@@ -217,13 +222,14 @@ class MatchController extends Controller
             'away_name' => 'required|string|max:50',
             'home_sub' => 'nullable|string|max:50',
             'away_sub' => 'nullable|string|max:50',
+            'home_logo' => 'nullable|string|max:2048',
+            'away_logo' => 'nullable|string|max:2048',
+            'logo' => 'nullable|string|max:2048',
             'period' => 'required|string|max:20',
             'clock' => 'nullable|string|max:10',
             'status' => 'nullable|string|max:20',
             'home_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'away_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'accent' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'pos' => 'required|in:bottom,top',
         ]);
 
         foreach (['clock', 'status', 'home_sub', 'away_sub'] as $field) {

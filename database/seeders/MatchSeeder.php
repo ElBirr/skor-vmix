@@ -26,8 +26,6 @@ class MatchSeeder extends Seeder
             'status' => 'LIVE',
             'home_color' => '#2563eb',
             'away_color' => '#dc2626',
-            'accent' => '#c00000',
-            'pos' => 'bottom',
             'set_scores' => [
                 ['home' => 25, 'away' => 23],
                 ['home' => 23, 'away' => 25],

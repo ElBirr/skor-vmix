@@ -8,7 +8,6 @@
   --gt-line: #bfbfbf;
   --gt-font: "Geometr415 Blk BT", "Bahnschrift Condensed", "Bahnschrift",
     "Arial Narrow", Impact, "Segoe UI", sans-serif;
-  --accent: #c00000;
   --home-color: #2563eb;
   --away-color: #dc2626;
 }
@@ -35,324 +34,293 @@ body {
 
 .overlay {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  width: min(940px, 92vw);
+  inset: 0;
   z-index: 10;
-  animation: gtReveal 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-.pos-bottom {
-  bottom: 72px;
-}
-
-.pos-top {
-  top: 72px;
-}
-
-@keyframes gtReveal {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) translateY(14px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-}
-
-.scoreboard {
-  position: relative;
-  background: var(--gt-navy-90);
-  border: 2px solid var(--gt-white);
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
-}
-
-/* Bar merah di atas panel, seperti header GT */
-.headline {
+/* ---------- Scene live: GT 11 SCOREBOARD LONG LOGO NEW ---------- */
+.scorebug {
   position: absolute;
-  left: -2px;
-  bottom: 100%;
-  display: flex;
-  align-items: stretch;
-  min-height: 46px;
-  background: var(--gt-red);
-  border: 2px solid var(--gt-white);
-  border-bottom: 0;
+  top: 68px;
+  left: 67px;
+  width: 391px;
+  height: 81px;
+  animation: gtReveal 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
-.headline-label {
-  display: flex;
-  align-items: center;
-  padding: 0 20px;
-  color: var(--gt-white);
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-
-.headline-clock,
-.headline-status {
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  border-left: 2px solid var(--gt-white);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-}
-
-.headline-status {
-  color: var(--gt-silver);
-  font-size: 16px;
-}
-
-.headline-clock:empty,
-.headline-status:empty {
-  display: none;
-}
-
-.team {
-  display: grid;
-  grid-template-columns: 78px 44px minmax(0, 1fr) auto 18px;
-  align-items: center;
-  gap: 16px;
-  min-height: 86px;
-  padding: 14px 18px;
-}
-
-/* Kotak skor = badge nomor GT: perak, angka hitam, garis putih */
-.team-score {
+.bug-logo {
+  position: absolute;
+  top: 0;
+  left: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 78px;
-  height: 64px;
-  background: var(--gt-silver);
+  width: 82px;
+  height: 79px;
+}
+
+.bug-logo img,
+.bug-logo svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.bug-logo.has-logo svg {
+  display: none;
+}
+
+.bug-panel {
+  position: absolute;
+  top: 0;
+  left: 82px;
+  display: flex;
+  flex-direction: column;
+  width: 309px;
+  height: 81px;
+  background: var(--gt-navy-90);
   border: 2px solid var(--gt-white);
-  color: #000;
-  font-size: 50px;
+  overflow: hidden;
+}
+
+.bug-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 44px 42px;
+  flex: 1;
+  min-height: 0;
+}
+
+.bug-line + .bug-line {
+  border-top: 2px solid var(--gt-white);
+}
+
+.bug-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding-left: 4px;
+}
+
+.bug-color {
+  flex: 0 0 9px;
+  width: 9px;
+  height: 35px;
+  background: var(--home-color);
+}
+
+.bug-line + .bug-line .bug-color {
+  background: var(--away-color);
+}
+
+.bug-team {
+  color: var(--gt-white);
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bug-sets {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gt-red);
+  color: var(--gt-white);
+  font-size: 24px;
   font-weight: 900;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
-.team-color {
-  width: 44px;
-  height: 44px;
-  background: var(--home-color);
-  border: 2px solid var(--gt-white);
+.bug-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--gt-silver);
+  color: #000;
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 
-.team-away .team-color {
-  background: var(--away-color);
+.sport-futsal .bug-sets {
+  color: transparent;
 }
 
-.team-info {
+/* ---------- Scene mulai/selesai: GT 01 VOLLEYBALL 2 OPENING B ---------- */
+.intro {
+  --intro-scale: 1;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) scale(var(--intro-scale));
   display: flex;
   flex-direction: column;
+  align-items: center;
+  width: 1046px;
+  animation: gtIntro 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.intro-headline {
+  display: flex;
+  align-items: center;
   justify-content: center;
-  gap: 2px;
-  min-width: 0;
-}
-
-.team-name {
-  color: var(--gt-white);
-  font-size: 30px;
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.team-sub {
-  color: var(--gt-red);
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-height: 18px;
-}
-
-.team-meta {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-
-.sets-won,
-.timeout-dots {
-  display: inline-flex;
-  gap: 5px;
-}
-
-.sets-won .set-dot {
-  width: 12px;
-  height: 12px;
-  background: transparent;
+  width: 500px;
+  height: 43px;
+  margin-bottom: -2px;
+  background: var(--gt-silver);
   border: 2px solid var(--gt-white);
+  color: #000;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
-.sets-won .set-dot.won {
-  background: var(--gt-red);
-}
-
-.timeout-dots .to-dot {
-  width: 16px;
-  height: 8px;
-  background: var(--gt-white);
-  border: 1px solid var(--gt-white);
-}
-
-.timeout-dots .to-dot.used {
-  background: transparent;
-  border-color: var(--gt-line);
-}
-
-/* Penanda serve: panah merah, pengganti ikon bola GT */
-.serve-mark {
-  width: 0;
-  height: 0;
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-left: 12px solid var(--accent);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.sport-volley .serve-mark.serving {
-  opacity: 1;
-}
-
-.sport-futsal .serve-mark,
-.sport-futsal .sets-won {
-  display: none;
-}
-
-/* Garis pemisah abu-abu seperti di panel GT */
-.board-divider {
-  height: 2px;
-  margin: 0 18px;
-  background: var(--gt-line);
-}
-
-/* Riwayat set: panel kecil bergaya GT */
-.set-strip {
+.intro-panel {
   display: flex;
   align-items: center;
-  align-self: flex-start;
-  gap: 16px;
-  margin-top: 10px;
-  padding: 8px 14px;
+  justify-content: space-between;
+  width: 865px;
+  height: 291px;
+  padding: 0 113px;
   background: var(--gt-navy-90);
   border: 2px solid var(--gt-white);
 }
 
-.set-label {
-  color: var(--gt-silver);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.set-item {
+.intro-logo {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  width: 201px;
+  height: 199px;
+}
+
+.intro-logo img {
+  width: 201px;
+  height: 199px;
+  object-fit: contain;
+}
+
+.intro-logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: var(--gt-silver);
+  border: 4px solid var(--gt-white);
+  color: var(--gt-navy);
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.intro-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 501px;
+  height: 40px;
+  margin-top: -2px;
+  padding: 0 16px;
+  background: var(--gt-red);
+  border: 2px solid var(--gt-white);
   color: var(--gt-white);
-  font-size: 18px;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
-.set-item .set-num {
-  color: var(--gt-red);
-  font-size: 12px;
-  font-weight: 700;
+.intro-teams {
+  display: flex;
+  gap: 48px;
+  width: 1046px;
+  margin-top: 32px;
 }
 
-.set-item.current {
-  color: var(--gt-red);
+.intro-team {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 499px;
+  height: 81px;
+  padding: 0 18px;
+  background: var(--gt-navy-90);
+  border: 2px solid var(--gt-white);
 }
 
-@media (max-width: 760px) {
-  .overlay {
-    width: calc(100vw - 32px);
-  }
+.intro-team-name {
+  color: var(--gt-white);
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-  .pos-bottom {
-    bottom: 24px;
-  }
+/* Ikon olahraga hanya sebagai logo cadangan */
+.logo-futsal,
+.sport-futsal .logo-volley {
+  display: none;
+}
 
-  .pos-top {
-    top: 24px;
-  }
+.sport-futsal .logo-futsal {
+  display: block;
+}
 
-  .headline {
-    min-height: 36px;
-  }
+/* ---------- Tampilkan hanya scene yang aktif ---------- */
+.scene-live .intro,
+.scene-start .scorebug,
+.scene-end .scorebug {
+  display: none;
+}
 
-  .headline-label {
-    padding: 0 12px;
-    font-size: 18px;
+@keyframes gtReveal {
+  from {
+    opacity: 0;
+    transform: translate(-14px, 8px);
   }
-
-  .headline-clock,
-  .headline-status {
-    padding: 0 10px;
-    font-size: 14px;
+  to {
+    opacity: 1;
+    transform: translate(0, 0);
   }
+}
 
-  .team {
-    grid-template-columns: 52px 30px minmax(0, 1fr) auto 14px;
-    gap: 10px;
-    min-height: 64px;
-    padding: 10px 12px;
+@keyframes gtIntro {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(18px);
   }
-
-  .team-score {
-    width: 52px;
-    height: 44px;
-    font-size: 32px;
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(0);
   }
+}
 
-  .team-color {
-    width: 30px;
-    height: 30px;
+@media (max-width: 1200px) {
+  .intro {
+    --intro-scale: 0.72;
   }
+}
 
-  .team-name {
-    font-size: 20px;
-  }
-
-  .team-sub {
-    font-size: 11px;
-  }
-
-  .sets-won .set-dot {
-    width: 8px;
-    height: 8px;
-  }
-
-  .timeout-dots .to-dot {
-    width: 10px;
-    height: 6px;
-  }
-
-  .set-item {
-    font-size: 15px;
+@media (max-width: 900px) {
+  .scorebug {
+    top: 16px;
+    left: 16px;
   }
 }
