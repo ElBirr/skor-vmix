@@ -25,18 +25,17 @@ class MatchController extends Controller
     {
         $data = $this->settingsData($request);
 
-        $match = DB::transaction(function () use ($data, $request) {
+        DB::transaction(function () use ($data, $request) {
             $match = Pertandingan::active()->lockForUpdate()->first();
             $before = $match?->toOverlayArray() ?? [];
 
             $match ??= Pertandingan::newMatch();
+            $this->ensureOpen($match);
             $match->fill($data);
             $match->save();
 
             $this->audit($match, $request, $before, $match->toOverlayArray(), 'settings_updated');
-
-            return $match;
-        });
+        }, 3);
 
         return back()->with('status', 'Pengaturan pertandingan diperbarui.');
     }
@@ -53,7 +52,7 @@ class MatchController extends Controller
             $match->save();
 
             $this->audit($match, $request, $before, $match->toOverlayArray(), 'match_finished');
-        });
+        }, 3);
 
         return redirect()->route('settings')->with('status', 'Pertandingan disimpan ke riwayat. Siapkan pertandingan berikutnya.');
     }
@@ -73,14 +72,22 @@ class MatchController extends Controller
                 return null;
             }
 
-            $this->ensureOpen($match);
             $before = $match->toOverlayArray();
-            $column = $data['side'].'_score';
-            $match->{$column} = max(0, $match->{$column} + $data['delta']);
+            $undoSet = $data['delta'] < 0
+                && ! empty($match->set_scores)
+                && ($match->is_finished || $match->{$data['side'].'_score'} === 0);
 
-            if ($data['delta'] > 0 && $match->sport === 'volley') {
-                $match->serving = $data['side'];
-                $this->completeSetWhenWon($match);
+            if ($undoSet) {
+                $this->undoLastSet($match);
+            } else {
+                $this->ensureOpen($match);
+                $column = $data['side'].'_score';
+                $match->{$column} = max(0, $match->{$column} + $data['delta']);
+
+                if ($data['delta'] > 0 && $match->sport === 'volley') {
+                    $match->serving = $data['side'];
+                    $this->completeSetWhenWon($match);
+                }
             }
 
             $match->save();
@@ -89,12 +96,12 @@ class MatchController extends Controller
                 $request,
                 $before,
                 $match->toOverlayArray(),
-                $data['delta'] > 0 ? 'point_awarded' : 'score_corrected',
+                $undoSet ? 'set_undone' : ($data['delta'] > 0 ? 'point_awarded' : 'score_corrected'),
                 $data['reason'] ?? null,
             );
 
             return $match;
-        });
+        }, 3);
 
         if (! $match) {
             return response()->json(['error' => 'Tidak ada pertandingan aktif'], 404);
@@ -142,7 +149,7 @@ class MatchController extends Controller
             $this->audit($match, $request, $before, $match->toOverlayArray(), $type, $reason);
 
             return $match;
-        });
+        }, 3);
 
         if (! $match) {
             return response()->json(['error' => 'Tidak ada pertandingan aktif'], 404);
@@ -177,6 +184,22 @@ class MatchController extends Controller
         $match->current_set = count($sets) + 1;
     }
 
+    private function undoLastSet(Pertandingan $match): void
+    {
+        $sets = $match->set_scores;
+        $last = array_pop($sets);
+
+        $match->set_scores = $sets;
+        $match->home_score = $last['home'];
+        $match->away_score = $last['away'];
+        $match->current_set = count($sets) + 1;
+        $match->home_timeouts = 0;
+        $match->away_timeouts = 0;
+        $match->serving = '';
+        $match->is_finished = false;
+        $match->status = 'LIVE';
+    }
+
     private function ensureOpen(Pertandingan $match): void
     {
         if ($match->is_finished) {
@@ -197,9 +220,9 @@ class MatchController extends Controller
             'period' => 'required|string|max:20',
             'clock' => 'nullable|string|max:10',
             'status' => 'nullable|string|max:20',
-            'home_color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'away_color' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
-            'accent' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'home_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'away_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'accent' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'pos' => 'required|in:bottom,top',
         ]);
 

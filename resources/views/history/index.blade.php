@@ -16,13 +16,15 @@
   <main class="container">
     <div class="top"><h1>Riwayat Pertandingan</h1><a href="{{ route('settings') }}" class="btn">Pengaturan</a></div>
     @forelse ($matches as $match)
+      @php $result = $match->sport === 'volley' ? $match->setsWon() : ['home' => $match->home_score, 'away' => $match->away_score]; @endphp
       <a class="match" href="{{ route('history.show', $match) }}">
-        <div class="teams">{{ $match->home_name }} <span class="score">{{ $match->home_score }} - {{ $match->away_score }}</span> {{ $match->away_name }}</div>
+        <div class="teams">{{ $match->home_name }} <span class="score">{{ $result['home'] }} - {{ $result['away'] }}</span> {{ $match->away_name }}</div>
         <div class="meta">{{ strtoupper($match->sport) }} · Selesai {{ $match->updated_at->format('d M Y H:i') }}</div>
       </a>
     @empty
       <p class="empty">Belum ada pertandingan selesai.</p>
     @endforelse
+    {{ $matches->links() }}
   </main>
 </body>
 </html>

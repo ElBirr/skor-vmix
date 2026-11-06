@@ -15,7 +15,8 @@
     <a href="{{ route('history') }}" class="btn">&larr; Riwayat</a>
     <section class="card">
       <h1>{{ $match->home_name }} vs {{ $match->away_name }}</h1>
-      <div class="score">{{ $match->home_score }} - {{ $match->away_score }}</div>
+      @php $result = $match->sport === 'volley' ? $match->setsWon() : ['home' => $match->home_score, 'away' => $match->away_score]; @endphp
+      <div class="score">{{ $result['home'] }} - {{ $result['away'] }}</div>
       <p class="meta">{{ strtoupper($match->sport) }} · {{ $match->status }} · {{ $match->updated_at->format('d M Y H:i') }}</p>
       @if ($match->set_scores)<p class="meta">Set: {{ collect($match->set_scores)->map(fn ($set) => $set['home'].'-'.$set['away'])->implode(', ') }}</p>@endif
     </section>
@@ -26,6 +27,7 @@
       @empty
         <p class="meta">Belum ada perubahan tercatat.</p>
       @endforelse
+      {{ $events->links() }}
     </section>
   </main>
 </body>

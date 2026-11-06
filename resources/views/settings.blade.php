@@ -71,7 +71,7 @@
       </div>
     </div>
     <p class="subtitle">
-      Overlay vMix: <a href="/overlay" target="_blank">/overlay</a> &mdash;
+      Overlay vMix: <a href="{{ route('overlay') }}" target="_blank">{{ route('overlay') }}</a> &mdash;
       Gunakan URL ini di Browser Input vMix (1920&times;1080).
     </p>
 

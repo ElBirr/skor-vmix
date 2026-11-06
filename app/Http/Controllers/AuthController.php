@@ -47,7 +47,7 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:12', 'confirmed'],
         ]);
 
-        $user = User::create([...$data, 'role' => 'admin']);
+        $user = User::create($data);
         Auth::login($user);
         $request->session()->regenerate();
 
@@ -61,33 +61,5 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login');
-    }
-
-    public function users(Request $request)
-    {
-        $this->ensureAdmin($request);
-
-        return view('auth.users', ['users' => User::orderBy('name')->get()]);
-    }
-
-    public function storeUser(Request $request)
-    {
-        $this->ensureAdmin($request);
-
-        $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique(User::class)],
-            'role' => ['required', Rule::in(['operator', 'referee'])],
-            'password' => ['required', 'string', 'min:12', 'confirmed'],
-        ]);
-
-        User::create($data);
-
-        return back()->with('status', 'Akun operator ditambahkan.');
-    }
-
-    private function ensureAdmin(Request $request): void
-    {
-        abort_unless($request->user()->role === 'admin', 403);
     }
 }

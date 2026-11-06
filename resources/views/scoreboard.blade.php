@@ -370,10 +370,15 @@
   <script>
     @if($match)
     const csrf = document.querySelector('meta[name="csrf-token"]').content;
+    let lastWrite = 0;
 
     async function refresh() {
+      const started = Date.now();
       const res = await fetch('{{ route('api.match') }}', { cache: 'no-store' });
-      if (res.ok) applyState(await res.json());
+      if (!res.ok) return;
+      const data = await res.json();
+      // Abaikan respons poll yang dimulai sebelum perubahan terakhir kita
+      if (started >= lastWrite) applyState(data);
     }
 
     function showToast() {
@@ -395,6 +400,7 @@
           body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error(res.status);
+        lastWrite = Date.now();
         return await res.json();
       } catch (e) {
         showToast();

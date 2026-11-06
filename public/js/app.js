@@ -4,6 +4,7 @@
   var VALID_SPORTS = ["volley", "futsal"];
   var VALID_POS = ["bottom", "top"];
   var POLL_MS = 1000;
+  var API_URL = (document.querySelector('meta[name="api-url"]') || {}).content || "/api/match";
 
   var els = {
     overlay: document.getElementById("overlay"),
@@ -230,23 +231,33 @@
     els.setStrip.hidden = false;
   }
 
-  function currentModel() {
-    return applyQueryOverrides(window.scoreboardModel || defaultModel());
-  }
-
   function applyAndRender(model) {
     window.scoreboardModel = model;
     render(applyQueryOverrides(model));
   }
 
+  // Gabung partial tanpa menghapus objek home/away hasil merge
+  function mergePartial(base, partial) {
+    if (partial.home) base.home = Object.assign({}, base.home, partial.home);
+    if (partial.away) base.away = Object.assign({}, base.away, partial.away);
+    var home = base.home;
+    var away = base.away;
+    Object.assign(base, partial);
+    base.home = home;
+    base.away = away;
+    return base;
+  }
+
   function poll() {
-    fetch("/api/match", { cache: "no-store" })
+    fetch(API_URL, { cache: "no-store" })
       .then(function (res) {
         if (!res.ok) throw new Error("no match");
         return res.json();
       })
       .then(function (data) {
-        applyAndRender(modelFromApi(data));
+        var model = modelFromApi(data);
+        if (window.scoreboardOverrides) model = mergePartial(model, window.scoreboardOverrides);
+        applyAndRender(model);
       })
       .catch(function () {
         // API belum tersedia: pertahankan render terakhir / default
@@ -262,13 +273,14 @@
   // Hook opsional untuk update manual dari console/vMix scripting
   window.updateScoreboard = function (partial) {
     if (!partial || typeof partial !== "object") return;
-    var base = Object.assign({}, window.scoreboardModel || defaultModel());
-    if (partial.home) base.home = Object.assign({}, base.home, partial.home);
-    if (partial.away) base.away = Object.assign({}, base.away, partial.away);
-    var merged = Object.assign(base, partial);
-    merged.sport = VALID_SPORTS.indexOf(merged.sport) === -1 ? base.sport : merged.sport;
-    merged.pos = VALID_POS.indexOf(merged.pos) === -1 ? base.pos : merged.pos;
-    applyAndRender(merged);
+    window.scoreboardOverrides = mergePartial(window.scoreboardOverrides || {}, partial);
+    applyAndRender(mergePartial(window.scoreboardModel || defaultModel(), window.scoreboardOverrides));
+  };
+
+  // Hapus override manual dan kembali mengikuti data server
+  window.resetScoreboard = function () {
+    window.scoreboardOverrides = null;
+    poll();
   };
 
   applyAndRender(defaultModel());

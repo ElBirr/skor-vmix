@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/history', function () {
         return view('history.index', [
-            'matches' => Pertandingan::where('is_finished', true)->latest('updated_at')->get(),
+            'matches' => Pertandingan::where('is_finished', true)->latest('updated_at')->paginate(50),
         ]);
     })->name('history');
 
@@ -41,7 +41,7 @@ Route::middleware('auth')->group(function () {
 
         return view('history.show', [
             'match' => $match,
-            'events' => MatchEvent::with('user')->where('match_id', $match->id)->latest()->get(),
+            'events' => MatchEvent::with('user')->where('match_id', $match->id)->latest()->paginate(100),
         ]);
     })->name('history.show');
 

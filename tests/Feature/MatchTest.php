@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Pertandingan;
 use App\Models\User;
+use Database\Seeders\MatchSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -192,5 +193,74 @@ class MatchTest extends TestCase
     public function test_score_controls_require_an_authenticated_operator(): void
     {
         $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertUnauthorized();
+    }
+
+    public function test_empty_color_is_rejected_instead_of_crashing(): void
+    {
+        $this->createMatch();
+
+        $this->from('/settings')->post('/match', [
+            'sport' => 'volley',
+            'pos' => 'bottom',
+            'period' => 'SET 1',
+            'status' => 'LIVE',
+            'home_name' => 'TIM A',
+            'away_name' => 'TIM B',
+            'home_color' => '',
+            'away_color' => '#2563eb',
+            'accent' => '#f59e0b',
+        ])->assertRedirect('/settings')->assertSessionHasErrors('home_color');
+
+        $this->assertDatabaseHas('matches', ['home_color' => '#e11d48']);
+    }
+
+    public function test_finished_match_cannot_be_edited_from_settings(): void
+    {
+        $this->createMatch();
+        $match = Pertandingan::active()->first();
+        $match->update(['is_finished' => true]);
+
+        $this->from('/settings')->post('/match', [
+            'sport' => 'volley',
+            'pos' => 'bottom',
+            'period' => 'SET 1',
+            'status' => 'LIVE',
+            'home_name' => 'DIUBAH',
+            'away_name' => 'TIM B',
+            'home_color' => '#e11d48',
+            'away_color' => '#2563eb',
+            'accent' => '#f59e0b',
+        ])->assertSessionHasErrors('match');
+
+        $this->assertSame('TIM A', $match->fresh()->home_name);
+    }
+
+    public function test_minus_on_zero_score_undoes_the_last_completed_set(): void
+    {
+        $this->createMatch();
+        $match = Pertandingan::active()->first();
+        $match->update([
+            'set_scores' => [['home' => 25, 'away' => 20]],
+            'current_set' => 2,
+            'home_score' => 0,
+            'away_score' => 0,
+        ]);
+
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => -1, 'reason' => 'Set salah tercatat'])->assertOk();
+
+        $match->refresh();
+        $this->assertSame([], $match->set_scores);
+        $this->assertSame(25, $match->home_score);
+        $this->assertSame(20, $match->away_score);
+        $this->assertSame(1, $match->current_set);
+    }
+
+    public function test_seeder_does_not_overwrite_the_live_match(): void
+    {
+        $this->createMatch();
+        $this->seed(MatchSeeder::class);
+
+        $this->assertDatabaseCount('matches', 1);
+        $this->assertSame('TIM A', Pertandingan::active()->first()->home_name);
     }
 }
