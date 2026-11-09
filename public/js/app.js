@@ -7,7 +7,7 @@
 
   var params = new URLSearchParams(window.location.search);
   // Scene lower third ditangani lower-third.js.
-  if ((params.get("scene") || "").toLowerCase() === "lower") return;
+  if (["lower", "break", "transition"].indexOf((params.get("scene") || "").toLowerCase()) !== -1) return;
 
   var scene = (params.get("scene") || "").toLowerCase();
   if (VALID_SCENES.indexOf(scene) === -1) scene = "live";
