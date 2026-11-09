@@ -13,29 +13,8 @@
     {{-- Papan skor pojok kiri (GT 11 SCOREBOARD LONG LOGO NEW) --}}
     <div class="scorebug" id="scorebug" aria-hidden="true">
       <span class="bug-logo" id="bugLogo">
-        <svg class="logo-volley" viewBox="0 0 200 200" role="img" aria-label="Bola voli">
-          <circle cx="100" cy="100" r="92" fill="#d9d9d9" stroke="#fff" stroke-width="5" />
-          <g fill="none" stroke="#001c54" stroke-width="7" stroke-linecap="round">
-            <path d="M100 10C74 55 74 145 100 190" />
-            <path d="M100 10c38 34 38 146 0 180" />
-            <path d="M12 84c44-16 132-16 176 0" />
-            <path d="M12 116c44 16 132 16 176 0" />
-          </g>
-        </svg>
-        <svg class="logo-futsal" viewBox="0 0 200 200" role="img" aria-label="Bola sepak">
-          <defs><clipPath id="ballClip"><circle cx="100" cy="100" r="90" /></clipPath></defs>
-          <circle cx="100" cy="100" r="92" fill="#ffffff" />
-          <g clip-path="url(#ballClip)" fill="#001c54">
-            <polygon points="100.0,70.0 128.5,90.7 117.6,124.3 82.4,124.3 71.5,90.7" />
-            <polygon points="100.0,38.0 71.5,17.3 82.4,-16.3 117.6,-16.3 128.5,17.3" />
-            <polygon points="159.0,80.8 169.9,47.3 205.1,47.3 216.0,80.8 187.5,101.6" />
-            <polygon points="136.4,150.2 171.7,150.2 182.6,183.7 154.1,204.4 125.5,183.7" />
-            <polygon points="63.6,150.2 74.5,183.7 45.9,204.4 17.4,183.7 28.3,150.2" />
-            <polygon points="41.0,80.8 12.5,101.6 -16.0,80.8 -5.1,47.3 30.1,47.3" />
-            <path d="M100.0 70.0L100.0 38.0 M128.5 90.7L159.0 80.8 M117.6 124.3L136.4 150.2 M82.4 124.3L63.6 150.2 M71.5 90.7L41.0 80.8" stroke="#001c54" stroke-width="6" />
-          </g>
-          <circle cx="100" cy="100" r="92" fill="none" stroke="#fff" stroke-width="5" />
-        </svg>
+        <img class="logo-volley" src="{{ asset('img/ball-volley.png') }}" alt="Bola voli" />
+        <img class="logo-futsal" src="{{ asset('img/ball-futsal.png') }}" alt="Bola sepak" />
       </span>
 
       <div class="bug-panel">
