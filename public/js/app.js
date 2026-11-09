@@ -57,6 +57,7 @@
 
   var VALID_SIDES = ["home", "away"];
   var lastScores = { home: null, away: null };
+  var lastSetsWon = { home: null, away: null };
   // Label SERVIS hanya tampil sebentar setiap kali servis berpindah.
   var SERVE_TAG_MS = 8000;
   var serveTag = { side: "", until: 0 };
@@ -233,8 +234,8 @@
     setScore(els.awayScore, "away", model.away.score);
     renderServe(model);
     renderTag(model);
-    els.homeSetsWon.textContent = model.sport === "volley" ? model.home.setsWon : "";
-    els.awaySetsWon.textContent = model.sport === "volley" ? model.away.setsWon : "";
+    setSetsWon(els.homeSetsWon, "home", model.sport === "volley" ? model.home.setsWon : "");
+    setSetsWon(els.awaySetsWon, "away", model.sport === "volley" ? model.away.setsWon : "");
 
     // Scene mulai/selesai
     els.introSport.textContent = model.sport === "futsal" ? "FUTSAL" : "VOLI";
@@ -261,6 +262,14 @@
     if (changed && els.overlay.dataset.ready) replay(el, "is-bumped");
     lastScores[side] = score;
     el.textContent = score;
+  }
+
+  // Jumlah set berubah: kotak set berkilat.
+  function setSetsWon(el, side, value) {
+    var changed = lastSetsWon[side] !== null && lastSetsWon[side] !== value;
+    if (changed && value !== "" && els.overlay.dataset.ready) replay(el, "is-bumped");
+    lastSetsWon[side] = value;
+    el.textContent = value;
   }
 
   function renderServe(model) {
@@ -460,7 +469,8 @@
     ["home", "away"].forEach(function (side, row) {
       var other = side === "home" ? "away" : "home";
       var tr = table.insertRow();
-      tr.style.setProperty("--i", row);
+      tr.style.setProperty("--i", row + 1);
+      if (model[side].setsWon > model[other].setsWon) tr.className = "is-winner-row";
       tr.style.setProperty("--row-color", model[side].color);
       var name = tr.insertCell();
       name.className = "is-name";
