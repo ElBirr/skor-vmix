@@ -22,8 +22,8 @@
         <input type="text" name="name" value="{{ old('name') }}" maxlength="255" required />
       </div>
       <div>
-        <label>Email</label>
-        <input type="email" name="email" value="{{ old('email') }}" maxlength="255" required />
+        <label>Nama pengguna</label>
+        <input type="text" name="username" value="{{ old('username') }}" minlength="3" maxlength="30" required />
       </div>
     </div>
     <div class="row">
@@ -47,7 +47,7 @@
       <thead>
         <tr>
           <th>Nama</th>
-          <th>Email</th>
+          <th>Nama pengguna</th>
           <th>Peran</th>
           <th>Status</th>
           <th>Aksi</th>
@@ -57,7 +57,7 @@
         @foreach ($users as $user)
           <tr>
             <td>{{ $user->name }}</td>
-            <td>{{ $user->email }}</td>
+            <td>{{ $user->username }}</td>
             <td><span class="pill">{{ $user->role }}</span></td>
             <td>
               @if ($user->is_active)

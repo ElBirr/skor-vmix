@@ -29,6 +29,6 @@
 
 <a class="match" href="{{ route('account.edit') }}">
   <div class="teams">Akun</div>
-  <div class="meta">Ubah nama, email, dan kata sandi sendiri</div>
+  <div class="meta">Ubah nama, username, dan kata sandi sendiri</div>
 </a>
 @endsection

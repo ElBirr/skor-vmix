@@ -38,11 +38,12 @@ Papan skor lapangan untuk voli dan futsal, lengkap dengan overlay broadcast untu
 - Admin bisa menghapus pertandingan selesai dari halaman detail (ketik `HAPUS` untuk konfirmasi). Event audit pertandingan itu ikut terhapus.
 
 ### Akun - `/account`
-- Semua operator bisa mengubah nama dan email, serta mengganti kata sandi (min. 12 karakter, wajib sandi lama).
+- Semua operator bisa mengubah nama dan nama pengguna, serta mengganti kata sandi (min. 12 karakter, wajib sandi lama).
 - Setelah ganti sandi, sesi login di perangkat lain diputus.
 
 ### Admin
 - Halaman admin hanya untuk peran `admin`. Akun pertama yang dibuat lewat `/register` otomatis menjadi admin; akun baru dari halaman Operator otomatis menjadi operator.
+- Akun memakai nama pengguna, bukan email. Login bisa memakai nama pengguna; akun lama masih bisa login dengan email-nya.
 - `/admin` - pusat admin: ringkasan data, operator, sistem, backup, dan akun.
 - `/admin/data` - penjelajah data hanya-baca untuk `matches`, `match_events`, dan `users` (kolom password/token tidak pernah ditampilkan), dengan ekspor CSV per tabel.
 - `/admin/users` - tambah operator, ubah peran, aktif/nonaktifkan akun, reset sandi. Admin tidak bisa menonaktifkan atau menurunkan akun sendiri.

@@ -15,16 +15,33 @@ class AccountTest extends TestCase
     {
         $this->post('/register', [
             'name' => 'Admin Pertama',
-            'email' => 'admin@example.com',
+            'username' => 'admin',
             'password' => 'sandi-pertama-123',
             'password_confirmation' => 'sandi-pertama-123',
         ])->assertRedirect(route('scoreboard'));
 
         $this->assertDatabaseHas('users', [
-            'email' => 'admin@example.com',
+            'username' => 'admin',
             'role' => 'admin',
             'is_active' => true,
         ]);
+    }
+
+    public function test_user_can_login_with_username_or_legacy_email(): void
+    {
+        $user = User::factory()->create([
+            'username' => 'operator.satu',
+            'email' => 'lama@example.com',
+            'password' => 'sandi-lama-12345',
+        ]);
+
+        $this->post('/login', ['login' => 'operator.satu', 'password' => 'sandi-lama-12345']);
+        $this->assertAuthenticatedAs($user);
+
+        $this->post('/logout');
+
+        $this->post('/login', ['login' => 'lama@example.com', 'password' => 'sandi-lama-12345']);
+        $this->assertAuthenticatedAs($user);
     }
 
     public function test_inactive_user_cannot_login(): void
@@ -35,9 +52,9 @@ class AccountTest extends TestCase
         ]);
 
         $this->post('/login', [
-            'email' => $user->email,
+            'login' => $user->username,
             'password' => 'sandi-lama-12345',
-        ])->assertSessionHasErrors('email');
+        ])->assertSessionHasErrors('login');
 
         $this->assertGuest();
     }
@@ -47,20 +64,20 @@ class AccountTest extends TestCase
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->put('/account', ['name' => 'Nama Baru', 'email' => 'baru@example.com'])
+            ->put('/account', ['name' => 'Nama Baru', 'username' => 'nama.baru'])
             ->assertRedirect();
 
-        $this->assertDatabaseHas('users', ['id' => $user->id, 'name' => 'Nama Baru', 'email' => 'baru@example.com']);
+        $this->assertDatabaseHas('users', ['id' => $user->id, 'name' => 'Nama Baru', 'username' => 'nama.baru']);
     }
 
-    public function test_profile_email_must_be_unique(): void
+    public function test_profile_username_must_be_unique(): void
     {
-        User::factory()->create(['email' => 'dipakai@example.com']);
+        User::factory()->create(['username' => 'dipakai']);
         $user = User::factory()->create();
 
         $this->actingAs($user)
-            ->put('/account', ['name' => 'Nama', 'email' => 'dipakai@example.com'])
-            ->assertSessionHasErrors('email');
+            ->put('/account', ['name' => 'Nama', 'username' => 'dipakai'])
+            ->assertSessionHasErrors('username');
     }
 
     public function test_password_change_requires_current_password(): void

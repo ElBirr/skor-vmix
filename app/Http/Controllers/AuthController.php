@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AuthController extends Controller
@@ -17,12 +18,15 @@ class AuthController extends Controller
     public function store(Request $request)
     {
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'login' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials + ['is_active' => true])) {
-            return back()->withErrors(['email' => 'Email atau kata sandi salah.'])->onlyInput('email');
+        $login = Str::lower(trim($credentials['login']));
+        $field = str_contains($login, '@') ? 'email' : 'username';
+
+        if (! Auth::attempt([$field => $login, 'password' => $credentials['password'], 'is_active' => true])) {
+            return back()->withErrors(['login' => 'Nama pengguna atau kata sandi salah.'])->onlyInput('login');
         }
 
         $request->session()->regenerate();
@@ -41,9 +45,11 @@ class AuthController extends Controller
     {
         abort_unless(User::doesntExist(), 404);
 
+        $request->merge(['username' => Str::lower(trim((string) $request->input('username')))]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique(User::class)],
+            'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9._-]+$/', Rule::unique(User::class)],
             'password' => ['required', 'string', 'min:12', 'confirmed'],
         ]);
 

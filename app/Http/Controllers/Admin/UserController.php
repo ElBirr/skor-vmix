@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -19,9 +20,11 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        $request->merge(['username' => Str::lower(trim((string) $request->input('username')))]);
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique(User::class)],
+            'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9._-]+$/', Rule::unique(User::class)],
             'password' => ['required', 'string', 'min:12', 'confirmed'],
         ]);
 

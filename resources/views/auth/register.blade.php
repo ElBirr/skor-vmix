@@ -16,7 +16,7 @@
     <form method="POST" action="{{ route('register.store') }}">
       @csrf
       <label>Nama <input name="name" value="{{ old('name') }}" autocomplete="name" required autofocus></label>
-      <label>Email <input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required></label>
+      <label>Nama pengguna <input name="username" value="{{ old('username') }}" autocomplete="username" minlength="3" maxlength="30" required></label>
       <label>Kata sandi <input type="password" name="password" minlength="12" autocomplete="new-password" required></label>
       <label>Ulangi kata sandi <input type="password" name="password_confirmation" minlength="12" autocomplete="new-password" required></label>
       <button type="submit" class="btn">Buat operator</button>

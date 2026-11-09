@@ -15,7 +15,7 @@
     @endif
     <form method="POST" action="{{ route('login.store') }}">
       @csrf
-      <label>Email <input type="email" name="email" value="{{ old('email') }}" autocomplete="email" required autofocus></label>
+      <label>Nama pengguna atau email <input name="login" value="{{ old('login') }}" autocomplete="username" required autofocus></label>
       <label>Kata sandi <input type="password" name="password" autocomplete="current-password" required></label>
       <button type="submit" class="btn">Masuk</button>
     </form>

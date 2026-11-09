@@ -88,13 +88,13 @@ class AdminTest extends TestCase
 
         $this->post('/admin/users', [
             'name' => 'Operator Baru',
-            'email' => 'operator@example.com',
+            'username' => 'operator.baru',
             'password' => 'password-baru-123',
             'password_confirmation' => 'password-baru-123',
         ])->assertRedirect();
 
         $this->assertDatabaseHas('users', [
-            'email' => 'operator@example.com',
+            'username' => 'operator.baru',
             'role' => 'operator',
             'is_active' => true,
         ]);

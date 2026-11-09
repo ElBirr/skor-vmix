@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class AccountController extends Controller
@@ -15,10 +16,11 @@ class AccountController extends Controller
     public function update(Request $request)
     {
         $user = $request->user();
+        $request->merge(['username' => Str::lower(trim((string) $request->input('username')))]);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255', Rule::unique('users')->ignore($user->id)],
+            'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9._-]+$/', Rule::unique('users')->ignore($user->id)],
         ]);
 
         $user->update($data);

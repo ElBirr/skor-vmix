@@ -22,7 +22,7 @@ class DataController extends Controller
             'ip_address', 'created_at', 'updated_at',
         ],
         'users' => [
-            'id', 'name', 'email', 'role', 'is_active', 'created_at', 'updated_at',
+            'id', 'name', 'username', 'email', 'role', 'is_active', 'created_at', 'updated_at',
         ],
     ];
 

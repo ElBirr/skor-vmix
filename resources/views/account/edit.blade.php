@@ -5,7 +5,7 @@
 <div class="top">
   <div>
     <h1>Akun</h1>
-    <p class="subtitle">{{ auth()->user()->name }} · {{ auth()->user()->email }} · {{ auth()->user()->role }}</p>
+    <p class="subtitle">{{ auth()->user()->name }} · {{ '@'.auth()->user()->username }} · {{ auth()->user()->role }}</p>
   </div>
 </div>
 
@@ -20,8 +20,8 @@
         <input type="text" name="name" value="{{ old('name', auth()->user()->name) }}" maxlength="255" required />
       </div>
       <div>
-        <label>Email</label>
-        <input type="email" name="email" value="{{ old('email', auth()->user()->email) }}" maxlength="255" required />
+        <label>Nama pengguna</label>
+        <input type="text" name="username" value="{{ old('username', auth()->user()->username) }}" minlength="3" maxlength="30" required />
       </div>
     </div>
     <button type="submit" class="btn">Simpan Profil</button>
