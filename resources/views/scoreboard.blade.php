@@ -199,6 +199,10 @@
     }
     .ctrl-btn span { font-size: 10px; color: var(--gt-silver); font-weight: 600; letter-spacing: 0.04em; }
     .ctrl-btn:active { background: rgba(255, 255, 255, 0.14); }
+    .overlaybar { justify-content: flex-start; min-height: 0; border-top-color: var(--gt-line); }
+    .overlaybar-label { font-size: 12px; color: var(--gt-silver); text-transform: uppercase; letter-spacing: 0.04em; }
+    .ctrl-btn.is-on { background: #fff; color: var(--gt-navy); border-color: #fff; }
+    .ctrl-btn.is-on span { color: var(--gt-navy); }
     .timeout-box {
       display: flex;
       align-items: center;
@@ -383,6 +387,20 @@
         </div>
       </div>
     </div>
+    <!-- Kontrol overlay vMix (tampil/sembunyi tiap scene) -->
+    @php($overlayState = \App\Http\Controllers\OverlayController::state())
+    <div class="bottombar overlaybar">
+      <span class="overlaybar-label">Overlay vMix</span>
+      @foreach (['live' => 'Papan Skor', 'start' => 'Opening', 'end' => 'Hasil Akhir'] as $overlayScene => $overlayLabel)
+        <button type="button" class="ctrl-btn @if($overlayState[$overlayScene]) is-on @endif" data-overlay-scene="{{ $overlayScene }}">
+          {{ $overlayLabel }}
+          <span>{{ $overlayState[$overlayScene] ? 'Tampil' : 'Sembunyi' }}</span>
+        </button>
+      @endforeach
+      @if($match->sport === 'volley')
+        <button type="button" class="ctrl-btn" id="serveCueBtn">Tampilkan Info Servis</button>
+      @endif
+    </div>
     <div id="toast">Gagal menyimpan — ulangi</div>
   @endif
 
@@ -453,6 +471,35 @@
       if (setBadge) setBadge.textContent = 'Set ' + data.currentSet + ' \u00b7 ' + data.home.setsWon + '-' + data.away.setsWon;
       const clockBadge = document.getElementById('clockBadge');
       if (clockBadge && data.clock) clockBadge.textContent = data.clock;
+      if (data.overlay) applyOverlayState(data.overlay);
+    }
+
+    function applyOverlayState(state) {
+      document.querySelectorAll('[data-overlay-scene]').forEach(btn => {
+        const visible = state[btn.dataset.overlayScene] !== false;
+        btn.classList.toggle('is-on', visible);
+        btn.querySelector('span').textContent = visible ? 'Tampil' : 'Sembunyi';
+      });
+    }
+
+    // Tombol tampil/sembunyi overlay
+    document.querySelectorAll('[data-overlay-scene]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (btn.disabled) return;
+        btn.disabled = true;
+        try {
+          const visible = !btn.classList.contains('is-on');
+          const state = await postJson('{{ route('overlay.visibility') }}', { scene: btn.dataset.overlayScene, visible });
+          if (state) applyOverlayState(state);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    });
+
+    const serveCueBtn = document.getElementById('serveCueBtn');
+    if (serveCueBtn) {
+      serveCueBtn.addEventListener('click', () => postJson('{{ route('overlay.serve-cue') }}', {}));
     }
 
     // Score +/- buttons

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LowerThirdController;
 use App\Http\Controllers\MatchController;
+use App\Http\Controllers\OverlayController;
 use App\Models\MatchEvent;
 use App\Models\Pertandingan;
 use Illuminate\Http\Request;
@@ -81,6 +82,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/match/score', [MatchController::class, 'adjustScore'])->name('match.score');
     Route::post('/match/serve', [MatchController::class, 'setServe'])->name('match.serve');
     Route::post('/match/timeout', [MatchController::class, 'adjustTimeout'])->name('match.timeout');
+    Route::post('/overlay/visibility', [OverlayController::class, 'updateVisibility'])->name('overlay.visibility');
+    Route::post('/overlay/serve-cue', [OverlayController::class, 'cueServe'])->name('overlay.serve-cue');
+
     Route::get('/lower-thirds', [LowerThirdController::class, 'index'])->name('lower-thirds.index');
     Route::post('/lower-thirds', [LowerThirdController::class, 'store'])->name('lower-thirds.store');
     Route::post('/lower-thirds/hide', [LowerThirdController::class, 'hide'])->name('lower-thirds.hide');
