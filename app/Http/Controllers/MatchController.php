@@ -240,6 +240,7 @@ class MatchController extends Controller
         $match->away_timeouts = 0;
         $match->serving = '';
         $match->current_set = count($sets) + 1;
+        $match->period = 'SET '.$match->current_set;
     }
 
     private function undoLastSet(Pertandingan $match): void
@@ -251,6 +252,7 @@ class MatchController extends Controller
         $match->home_score = $last['home'];
         $match->away_score = $last['away'];
         $match->current_set = count($sets) + 1;
+        $match->period = 'SET '.$match->current_set;
         $match->home_timeouts = 0;
         $match->away_timeouts = 0;
         $match->serving = '';

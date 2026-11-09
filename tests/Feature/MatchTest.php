@@ -145,6 +145,7 @@ class MatchTest extends TestCase
         $m = Pertandingan::active()->first();
         $this->assertSame([['home' => 26, 'away' => 24]], $m->set_scores);
         $this->assertSame(2, $m->current_set);
+        $this->assertSame('SET 2', $m->period);
         $this->assertSame(0, $m->home_score);
         $this->assertSame(0, $m->away_score);
     }

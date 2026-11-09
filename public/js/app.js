@@ -116,6 +116,7 @@
       period: "SET 1",
       clock: "",
       status: "",
+      currentSet: 1,
       sets: [],
       serving: "",
       timeout: null,
@@ -134,6 +135,7 @@
     model.period = sanitizeText(data.period, model.period, 20);
     model.clock = sanitizeText(data.clock, "", 10);
     model.status = sanitizeText(data.status, "", 20);
+    model.currentSet = clampInt(data.currentSet, 1, 5, 1);
 
     if (Array.isArray(data.sets)) {
       model.sets = data.sets.slice(0, 5).map(function (set) {
@@ -432,6 +434,15 @@
           ? model.home.score + " - " + model.away.score
           : model.home.setsWon + " - " + model.away.setsWon
       );
+      return parts.join(" • ");
+    }
+
+    // Voli: set berjalan dan skor set diisi otomatis dari data pertandingan.
+    if (model.sport === "volley") {
+      parts.push("SET " + model.currentSet);
+      if (model.home.setsWon || model.away.setsWon) {
+        parts.push(model.home.setsWon + " - " + model.away.setsWon);
+      }
       return parts.join(" • ");
     }
 
