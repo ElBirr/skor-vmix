@@ -6,6 +6,9 @@
   var POLL_MS = 1000;
 
   var params = new URLSearchParams(window.location.search);
+  // Scene lower third ditangani lower-third.js.
+  if ((params.get("scene") || "").toLowerCase() === "lower") return;
+
   var scene = (params.get("scene") || "").toLowerCase();
   if (VALID_SCENES.indexOf(scene) === -1) scene = "live";
 
@@ -58,6 +61,9 @@
   // Kartu "AKHIR SET" tampil sebentar setiap kali set selesai.
   var SET_END_MS = 8000;
   var setEnd = { count: null, until: 0 };
+  // Kontrol dari halaman operator; hanya bereaksi saat nilainya berubah
+  // supaya overlayIn()/overlayOut() dari vMix tetap bisa dipakai.
+  var remote = { visible: null, serveCue: null };
 
   function clampInt(value, min, max, fallback) {
     var n = parseInt(value, 10);
@@ -505,6 +511,7 @@
         return res.json();
       })
       .then(function (data) {
+        applyRemoteControl(data && data.overlay);
         var model = modelFromApi(data);
         if (window.scoreboardOverrides) model = mergePartial(model, window.scoreboardOverrides);
         applyAndRender(model);
@@ -518,6 +525,28 @@
       .finally(function () {
         els.overlay.dataset.ready = "1";
       });
+  }
+
+  function applyRemoteControl(control) {
+    if (!control) return;
+
+    var visible = control[scene] !== false;
+    if (remote.visible === null) {
+      if (!visible) {
+        els.overlay.dataset.out = "1";
+        els.overlay.hidden = true;
+      }
+    } else if (visible !== remote.visible) {
+      if (visible) window.overlayIn();
+      else window.overlayOut();
+    }
+    remote.visible = visible;
+
+    var cue = parseInt(control.serveCue, 10) || 0;
+    if (remote.serveCue !== null && cue !== remote.serveCue) {
+      serveTag.side = "";
+    }
+    remote.serveCue = cue;
   }
 
   // Hook opsional untuk update manual dari console/vMix scripting
