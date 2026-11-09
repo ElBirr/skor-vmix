@@ -84,6 +84,30 @@ class MatchTest extends TestCase
         $this->assertSame(0, Pertandingan::active()->first()->away_timeouts);
     }
 
+    public function test_overlay_api_reports_running_timeout_until_it_expires(): void
+    {
+        $this->createMatch();
+        $this->getJson('/api/match')->assertJsonPath('timeout', null);
+
+        $this->postJson('/match/timeout', ['side' => 'away', 'delta' => 1])->assertOk();
+        $this->getJson('/api/match')
+            ->assertJsonPath('timeout.side', 'away')
+            ->assertJsonPath('timeout.duration', 30);
+
+        $this->travel(31)->seconds();
+        $this->getJson('/api/match')->assertJsonPath('timeout', null);
+    }
+
+    public function test_overlay_api_clears_timeout_after_correction(): void
+    {
+        $this->createMatch();
+
+        $this->postJson('/match/timeout', ['side' => 'home', 'delta' => 1])->assertOk();
+        $this->postJson('/match/timeout', ['side' => 'home', 'delta' => -1, 'reason' => 'Salah tekan'])->assertOk();
+
+        $this->getJson('/api/match')->assertJsonPath('timeout', null);
+    }
+
     public function test_volleyball_set_requires_a_two_point_lead(): void
     {
         $this->createMatch();

@@ -25,7 +25,10 @@ class MatchController extends Controller
             return response()->json(null, 404);
         }
 
-        return response()->json($match->toOverlayArray());
+        return response()->json([
+            ...$match->toOverlayArray(),
+            'timeout' => $match->is_finished ? null : $match->activeTimeout(),
+        ]);
     }
 
     public function update(Request $request)

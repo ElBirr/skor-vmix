@@ -34,8 +34,22 @@
     introAwayLogo: document.getElementById("introAwayLogo"),
     introHomeFallback: document.getElementById("introHomeFallback"),
     introAwayFallback: document.getElementById("introAwayFallback"),
-    introSets: document.getElementById("introSets")
+    introSets: document.getElementById("introSets"),
+    introVs: document.querySelector(".intro-vs"),
+    introHomeTeam: document.getElementById("introHomeTeam"),
+    introAwayTeam: document.getElementById("introAwayTeam"),
+    homeServe: document.getElementById("homeServe"),
+    awayServe: document.getElementById("awayServe"),
+    bugTag: document.getElementById("bugTag"),
+    bugTagColor: document.getElementById("bugTagColor"),
+    bugTagLabel: document.getElementById("bugTagLabel"),
+    bugTagTeam: document.getElementById("bugTagTeam"),
+    bugTagClock: document.getElementById("bugTagClock"),
+    bugTagProgress: document.getElementById("bugTagProgress")
   };
+
+  var VALID_SIDES = ["home", "away"];
+  var lastScores = { home: null, away: null };
 
   function clampInt(value, min, max, fallback) {
     var n = parseInt(value, 10);
@@ -86,7 +100,9 @@
       period: "SET 1",
       clock: "",
       status: "",
-      sets: []
+      sets: [],
+      serving: "",
+      timeout: null
     };
   }
 
@@ -108,6 +124,16 @@
           away: clampInt(set.away, 0, 999, 0)
         };
       });
+    }
+
+    model.serving = VALID_SIDES.indexOf(data.serving) === -1 ? "" : data.serving;
+    if (data.timeout && VALID_SIDES.indexOf(data.timeout.side) !== -1) {
+      var duration = clampInt(data.timeout.duration, 1, 600, 30);
+      model.timeout = {
+        side: data.timeout.side,
+        duration: duration,
+        remaining: clampInt(data.timeout.remaining, 0, duration, 0)
+      };
     }
 
     if (data.home) {
@@ -145,6 +171,10 @@
     if (params.has("period")) model.period = sanitizeText(params.get("period"), model.period, 20);
     if (params.has("clock")) model.clock = sanitizeText(params.get("clock"), "", 10);
     if (params.has("time")) model.clock = sanitizeText(params.get("time"), "", 10);
+    if (params.has("serving")) {
+      var serving = params.get("serving").toLowerCase();
+      model.serving = VALID_SIDES.indexOf(serving) === -1 ? "" : serving;
+    }
     if (params.has("status")) model.status = sanitizeText(params.get("status"), "", 20);
     return model;
   }
@@ -163,8 +193,10 @@
     // Papan skor pojok kiri
     els.homeName.textContent = model.home.name;
     els.awayName.textContent = model.away.name;
-    els.homeScore.textContent = model.home.score;
-    els.awayScore.textContent = model.away.score;
+    setScore(els.homeScore, "home", model.home.score);
+    setScore(els.awayScore, "away", model.away.score);
+    renderServe(model);
+    renderTag(model);
     els.homeSetsWon.textContent = model.sport === "volley" ? model.home.setsWon : "";
     els.awaySetsWon.textContent = model.sport === "volley" ? model.away.setsWon : "";
     renderEventLogo(model.logo);
@@ -172,6 +204,7 @@
     // Scene mulai/selesai
     els.introSport.textContent = model.sport === "futsal" ? "FUTSAL" : "VOLI";
     els.introDesc.textContent = introDescription(model);
+    renderWinner(model);
     els.introHomeName.textContent = model.home.name;
     els.introAwayName.textContent = model.away.name;
     renderTeamLogo(els.introHomeLogo, els.introHomeFallback, model.home);
@@ -179,18 +212,112 @@
     renderSetHistory(model);
   }
 
+  // Ulang animasi kelas tertentu pada elemen.
+  function replay(el, className) {
+    el.classList.remove(className);
+    void el.offsetWidth;
+    el.classList.add(className);
+  }
+
+  // Skor berubah: animasi "pop" supaya penonton sadar ada poin baru.
+  function setScore(el, side, score) {
+    var changed = lastScores[side] !== null && lastScores[side] !== score;
+    if (changed && els.overlay.dataset.ready) replay(el, "is-bumped");
+    lastScores[side] = score;
+    el.textContent = score;
+  }
+
+  function renderServe(model) {
+    var serving = model.sport === "volley" ? model.serving : "";
+    els.homeServe.hidden = serving !== "home";
+    els.awayServe.hidden = serving !== "away";
+  }
+
+  // Label di bawah papan skor: TIME OUT (prioritas) atau SERVIS.
+  function renderTag(model) {
+    var mode = "";
+    var side = "";
+    if (model.timeout) {
+      mode = "timeout";
+      side = model.timeout.side;
+    } else if (model.sport === "volley" && model.serving) {
+      mode = "serve";
+      side = model.serving;
+    }
+
+    if (!mode) {
+      hideTag();
+      return;
+    }
+
+    var tag = els.bugTag;
+    var key = mode + ":" + side;
+    if (tag.dataset.key !== key) {
+      tag.dataset.key = key;
+      tag.hidden = false;
+      tag.classList.remove("is-hiding");
+      replay(tag, "is-showing");
+    }
+    tag.classList.toggle("is-timeout", mode === "timeout");
+    tag.style.setProperty("--tag-color", model[side].color);
+    els.bugTagLabel.textContent = mode === "timeout" ? "TIME OUT" : "SERVIS";
+    els.bugTagTeam.textContent = model[side].name;
+
+    if (mode === "timeout") {
+      var r = model.timeout.remaining;
+      els.bugTagClock.hidden = false;
+      els.bugTagClock.textContent = Math.floor(r / 60) + ":" + String(r % 60).padStart(2, "0");
+      els.bugTagProgress.style.transform = "scaleX(" + (r / model.timeout.duration) + ")";
+    } else {
+      els.bugTagClock.hidden = true;
+      els.bugTagProgress.style.transform = "scaleX(0)";
+    }
+  }
+
+  function hideTag() {
+    var tag = els.bugTag;
+    if (tag.hidden || tag.dataset.key === "") return;
+    tag.dataset.key = "";
+    tag.classList.remove("is-showing");
+    tag.classList.add("is-hiding");
+    setTimeout(function () {
+      if (tag.dataset.key === "") tag.hidden = true;
+    }, 320);
+  }
+
+  // Scene selesai: sorot tim pemenang dan tampilkan skor akhir di tengah.
+  function renderWinner(model) {
+    var winner = "";
+    if (scene === "end") {
+      var h = model.sport === "futsal" ? model.home.score : model.home.setsWon;
+      var a = model.sport === "futsal" ? model.away.score : model.away.setsWon;
+      winner = h > a ? "home" : a > h ? "away" : "";
+      els.introVs.textContent = h + " - " + a;
+    } else {
+      els.introVs.textContent = "VS";
+    }
+    els.introHomeTeam.classList.toggle("is-winner", winner === "home");
+    els.introAwayTeam.classList.toggle("is-winner", winner === "away");
+  }
+
   // Riwayat skor per set, hanya di scene selesai.
   function renderSetHistory(model) {
     if (scene !== "end" || model.sets.length === 0) {
       els.introSets.hidden = true;
       els.introSets.replaceChildren();
+      els.introSets.dataset.key = "";
       return;
     }
+
+    var key = JSON.stringify(model.sets);
+    if (els.introSets.dataset.key === key) return;
+    els.introSets.dataset.key = key;
 
     els.introSets.replaceChildren();
     model.sets.forEach(function (set, index) {
       var chip = document.createElement("span");
       chip.className = "intro-set";
+      chip.style.setProperty("--i", index);
 
       var label = document.createElement("b");
       label.textContent = "Set " + (index + 1);
