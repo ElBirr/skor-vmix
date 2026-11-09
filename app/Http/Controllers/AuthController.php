@@ -21,7 +21,7 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials)) {
+        if (! Auth::attempt($credentials + ['is_active' => true])) {
             return back()->withErrors(['email' => 'Email atau kata sandi salah.'])->onlyInput('email');
         }
 
@@ -47,7 +47,7 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:12', 'confirmed'],
         ]);
 
-        $user = User::create($data);
+        $user = User::create($data + ['role' => 'admin', 'is_active' => true]);
         Auth::login($user);
         $request->session()->regenerate();
 

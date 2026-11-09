@@ -1,9 +1,15 @@
 <?php
 
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\DataController;
+use App\Http\Controllers\Admin\SystemController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MatchController;
 use App\Models\MatchEvent;
 use App\Models\Pertandingan;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -30,9 +36,28 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('settings');
 
-    Route::get('/history', function () {
+    Route::get('/history', function (Request $request) {
+        $filters = $request->validate([
+            'q' => ['nullable', 'string', 'max:50'],
+            'sport' => ['nullable', 'in:volley,futsal'],
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+        ]);
+
+        $matches = Pertandingan::query()->where('is_finished', true)
+            ->when($filters['q'] ?? null, fn ($query, $q) => $query->where(
+                fn ($inner) => $inner->where('home_name', 'like', "%{$q}%")->orWhere('away_name', 'like', "%{$q}%")
+            ))
+            ->when($filters['sport'] ?? null, fn ($query, $sport) => $query->where('sport', $sport))
+            ->when($filters['from'] ?? null, fn ($query, $from) => $query->whereDate('updated_at', '>=', $from))
+            ->when($filters['to'] ?? null, fn ($query, $to) => $query->whereDate('updated_at', '<=', $to))
+            ->latest('updated_at')
+            ->paginate(50)
+            ->withQueryString();
+
         return view('history.index', [
-            'matches' => Pertandingan::where('is_finished', true)->latest('updated_at')->paginate(50),
+            'matches' => $matches,
+            'filters' => $filters,
         ]);
     })->name('history');
 
@@ -45,12 +70,34 @@ Route::middleware('auth')->group(function () {
         ]);
     })->name('history.show');
 
+    Route::get('/account', [AccountController::class, 'edit'])->name('account.edit');
+    Route::put('/account', [AccountController::class, 'update'])->name('account.update');
+    Route::put('/account/password', [AccountController::class, 'updatePassword'])->name('account.password');
+
     Route::post('/match', [MatchController::class, 'update'])->name('match.update');
     Route::post('/match/finish', [MatchController::class, 'finish'])->name('match.finish');
     Route::post('/match/score', [MatchController::class, 'adjustScore'])->name('match.score');
     Route::post('/match/serve', [MatchController::class, 'setServe'])->name('match.serve');
     Route::post('/match/timeout', [MatchController::class, 'adjustTimeout'])->name('match.timeout');
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
+
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/data', [DataController::class, 'index'])->name('admin.data');
+        Route::get('/admin/data/{table}', [DataController::class, 'show'])->name('admin.data.show');
+        Route::get('/admin/data/{table}/export', [DataController::class, 'export'])->name('admin.data.export');
+
+        Route::get('/admin/backup', BackupController::class)->name('admin.backup');
+
+        Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users');
+        Route::post('/admin/users', [UserController::class, 'store'])->name('admin.users.store');
+        Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+        Route::put('/admin/users/{user}/password', [UserController::class, 'resetPassword'])->name('admin.users.password');
+
+        Route::get('/admin/system', [SystemController::class, 'index'])->name('admin.system');
+        Route::post('/admin/system/logos', [SystemController::class, 'cleanupLogos'])->name('admin.system.logos');
+
+        Route::delete('/admin/matches/{match}', [MatchController::class, 'destroy'])->name('admin.matches.destroy');
+    });
 });
 
 Route::get('/overlay', function () {

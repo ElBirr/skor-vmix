@@ -301,6 +301,10 @@
       <div class="topbar-right">
         <a href="{{ route('overlay') }}" target="_blank" class="btn-link">vMix Overlay</a>
         <a href="{{ route('history') }}" class="btn-link">Riwayat</a>
+        <a href="{{ route('account.edit') }}" class="btn-link">Akun</a>
+        @if (auth()->user()->isAdmin())
+          <a href="{{ route('admin.data') }}" class="btn-link">Data</a>
+        @endif
         <a href="{{ route('settings') }}" class="btn-link">Pengaturan Tim</a>
         <form method="POST" action="{{ route('match.finish') }}" onsubmit="return confirm('Selesaikan pertandingan? Data akan masuk ke riwayat.')">@csrf<button type="submit" class="btn-link">Selesai Pertandingan</button></form>
         <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="btn-link">Keluar</button></form>

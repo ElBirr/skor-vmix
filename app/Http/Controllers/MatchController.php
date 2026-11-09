@@ -6,6 +6,8 @@ use App\Models\MatchEvent;
 use App\Models\Pertandingan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class MatchController extends Controller
@@ -60,6 +62,43 @@ class MatchController extends Controller
         }, 3);
 
         return redirect()->route('settings')->with('status', 'Pertandingan disimpan ke riwayat. Siapkan pertandingan berikutnya.');
+    }
+
+    public function destroy(Request $request, Pertandingan $match)
+    {
+        if (! $match->is_finished) {
+            throw ValidationException::withMessages([
+                'match' => 'Hanya pertandingan selesai yang bisa dihapus.',
+            ]);
+        }
+
+        $request->validate([
+            'confirm' => ['required', Rule::in(['HAPUS'])],
+        ], [
+            'confirm.required' => 'Ketik HAPUS untuk konfirmasi.',
+            'confirm.in' => 'Ketik HAPUS untuk konfirmasi.',
+        ]);
+
+        $logos = array_filter([$match->logo, $match->home_logo, $match->away_logo]);
+        $match->delete();
+
+        foreach ($logos as $path) {
+            if (! str_starts_with($path, '/storage/logos/')) {
+                continue;
+            }
+
+            $stillUsed = Pertandingan::query()
+                ->where('logo', $path)
+                ->orWhere('home_logo', $path)
+                ->orWhere('away_logo', $path)
+                ->exists();
+
+            if (! $stillUsed) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $path));
+            }
+        }
+
+        return redirect()->route('history')->with('status', 'Pertandingan dihapus.');
     }
 
     public function adjustScore(Request $request)

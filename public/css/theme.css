@@ -371,6 +371,150 @@ input::placeholder {
   padding-left: 20px;
 }
 
+/* Navigasi halaman admin/akun */
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 28px;
+  padding-bottom: 14px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.nav a {
+  padding: 7px 12px;
+  border: 2px solid transparent;
+  color: var(--gt-silver);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.nav a:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.nav a.active {
+  background: var(--gt-red);
+  border-color: var(--gt-white);
+  color: var(--gt-white);
+}
+
+/* Tabel data */
+.table-wrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table th,
+.table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  text-align: left;
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+.table th {
+  color: var(--gt-silver);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Badge status */
+.pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.pill-ok {
+  border-color: #4ade80;
+  color: #86efac;
+}
+
+.pill-off {
+  border-color: #f87171;
+  color: #fca5a5;
+}
+
+/* Form kecil di dalam tabel */
+.inline-form {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+}
+
+.inline-form select,
+.inline-form input {
+  width: auto;
+  margin: 0;
+  padding: 6px 8px;
+  font-size: 13px;
+}
+
+.inline-form .btn {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.reset {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.reset summary {
+  cursor: pointer;
+  color: var(--gt-muted);
+}
+
+/* Filter riwayat */
+.filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.filter input,
+.filter select {
+  width: auto;
+  margin: 0;
+}
+
+.filter input[name="q"] {
+  min-width: 200px;
+}
+
+.filter .btn {
+  margin: 0;
+}
+
 @media (max-width: 560px) {
   body {
     padding: 20px 12px;
@@ -383,5 +527,10 @@ input::placeholder {
   .row,
   .row-3 {
     grid-template-columns: 1fr;
+  }
+
+  .filter input,
+  .filter select {
+    width: 100%;
   }
 }

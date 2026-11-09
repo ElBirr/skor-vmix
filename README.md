@@ -33,6 +33,21 @@ Papan skor lapangan untuk voli dan futsal, lengkap dengan overlay broadcast untu
 ### API
 - `GET /api/match` — state pertandingan aktif dalam JSON untuk overlay.
 
+### Riwayat - `/history`
+- Daftar pertandingan selesai, bisa difilter nama tim, cabang olahraga, dan rentang tanggal.
+- Admin bisa menghapus pertandingan selesai dari halaman detail (ketik `HAPUS` untuk konfirmasi). Event audit pertandingan itu ikut terhapus.
+
+### Akun - `/account`
+- Semua operator bisa mengubah nama dan email, serta mengganti kata sandi (min. 12 karakter, wajib sandi lama).
+- Setelah ganti sandi, sesi login di perangkat lain diputus.
+
+### Admin
+- Halaman admin hanya untuk peran `admin`. Akun pertama yang dibuat lewat `/register` otomatis menjadi admin; akun baru dari halaman Operator otomatis menjadi operator.
+- `/admin/data` - penjelajah data hanya-baca untuk `matches`, `match_events`, dan `users` (kolom password/token tidak pernah ditampilkan), dengan ekspor CSV per tabel.
+- `/admin/users` - tambah operator, ubah peran, aktif/nonaktifkan akun, reset sandi. Admin tidak bisa menonaktifkan atau menurunkan akun sendiri.
+- `/admin/system` - status PHP/Laravel/database/storage dan pembersihan file logo yang tidak dipakai.
+- `/admin/backup` - unduh salinan database SQLite yang konsisten (`VACUUM INTO`). File berisi hash sandi, simpan di tempat aman.
+
 ## Menjalankan
 
 ```bash

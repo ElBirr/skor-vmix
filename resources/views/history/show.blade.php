@@ -15,6 +15,14 @@
       <div class="score">{{ $result['home'] }} - {{ $result['away'] }}</div>
       <p class="meta">{{ strtoupper($match->sport) }} · {{ $match->status }} · {{ $match->updated_at->format('d M Y H:i') }}</p>
       @if ($match->set_scores)<p class="meta">Set: {{ collect($match->set_scores)->map(fn ($set) => $set['home'].'-'.$set['away'])->implode(', ') }}</p>@endif
+      @if (auth()->user()->isAdmin())
+        <form method="POST" action="{{ route('admin.matches.destroy', $match) }}" class="inline-form" onsubmit="return confirm('Hapus pertandingan ini beserta riwayat perubahannya?')">
+          @csrf
+          @method('DELETE')
+          <input type="text" name="confirm" placeholder="Ketik HAPUS" required />
+          <button type="submit" class="btn">Hapus Pertandingan</button>
+        </form>
+      @endif
     </section>
     <section class="card">
       <h2>Perubahan</h2>
