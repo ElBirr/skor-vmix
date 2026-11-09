@@ -122,6 +122,7 @@
       clock: "",
       status: "",
       currentSet: 1,
+      headline: "",
       venue: "",
       date: "",
       sets: [],
@@ -143,6 +144,7 @@
     model.clock = sanitizeText(data.clock, "", 10);
     model.status = sanitizeText(data.status, "", 20);
     model.currentSet = clampInt(data.currentSet, 1, 5, 1);
+    model.headline = sanitizeText(data.headline, "", 40);
     model.venue = sanitizeText(data.venue, "", 60);
     model.date = /^\d{4}-\d{2}-\d{2}$/.test(data.date || "") ? data.date : "";
 
@@ -238,7 +240,7 @@
     setSetsWon(els.awaySetsWon, "away", model.sport === "volley" ? model.away.setsWon : "");
 
     // Scene mulai/selesai
-    els.introSport.textContent = model.sport === "futsal" ? "FUTSAL" : "VOLI";
+    els.introSport.textContent = model.headline || (model.sport === "futsal" ? "FUTSAL" : "VOLI");
     els.introDesc.textContent = introDescription(model);
     renderWinner(model);
     renderEventHeader(model);

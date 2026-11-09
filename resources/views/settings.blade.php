@@ -113,6 +113,8 @@
 
       <div class="card">
         <h2>Opsi Tampilan</h2>
+        <label>Judul Headline Opening/Hasil (kosong = nama olahraga)</label>
+        <input type="text" name="headline" value="{{ old('headline', $match->headline) }}" maxlength="40" placeholder="mis. PORPROV 2026 / FINAL VOLI PUTRA" />
         <div class="row">
           <div>
             <label>Venue / Lokasi (tampil di Opening)</label>

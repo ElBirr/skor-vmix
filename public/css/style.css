@@ -183,9 +183,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 500px;
+  min-width: 500px;
+  max-width: 865px;
   height: 43px;
   margin-bottom: -2px;
+  padding: 0 32px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   background: var(--gt-silver);
   border: 2px solid var(--gt-white);
   color: #000;
