@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\DataController;
 use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LowerThirdController;
 use App\Http\Controllers\MatchController;
 use App\Models\MatchEvent;
 use App\Models\Pertandingan;
@@ -80,6 +81,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/match/score', [MatchController::class, 'adjustScore'])->name('match.score');
     Route::post('/match/serve', [MatchController::class, 'setServe'])->name('match.serve');
     Route::post('/match/timeout', [MatchController::class, 'adjustTimeout'])->name('match.timeout');
+    Route::get('/lower-thirds', [LowerThirdController::class, 'index'])->name('lower-thirds.index');
+    Route::post('/lower-thirds', [LowerThirdController::class, 'store'])->name('lower-thirds.store');
+    Route::post('/lower-thirds/hide', [LowerThirdController::class, 'hide'])->name('lower-thirds.hide');
+    Route::post('/lower-thirds/{lowerThird}/show', [LowerThirdController::class, 'show'])->name('lower-thirds.show');
+    Route::delete('/lower-thirds/{lowerThird}', [LowerThirdController::class, 'destroy'])->name('lower-thirds.destroy');
+
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
     Route::middleware('admin')->group(function () {
@@ -107,3 +114,4 @@ Route::get('/overlay', function () {
 })->name('overlay');
 
 Route::get('/api/match', [MatchController::class, 'current'])->name('api.match');
+Route::get('/api/lower-third', [LowerThirdController::class, 'current'])->name('api.lower-third');
