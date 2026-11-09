@@ -23,6 +23,8 @@ class Pertandingan extends Model
         'status',
         'home_color',
         'away_color',
+        'theme_primary',
+        'theme_accent',
         'logo',
         'set_scores',
         'current_set',
@@ -51,7 +53,12 @@ class Pertandingan extends Model
 
     public static function newMatch(): self
     {
+        // Tema warna mengikuti pertandingan terakhir supaya satu event tetap seragam.
+        $previous = self::latest('id')->first();
+
         return new self([
+            'theme_primary' => $previous->theme_primary ?? '#001c54',
+            'theme_accent' => $previous->theme_accent ?? '#c00000',
             'is_active' => true,
             'is_finished' => false,
             'sport' => 'volley',
@@ -171,6 +178,10 @@ class Pertandingan extends Model
             'sets' => $this->set_scores ?? [],
             'currentSet' => $this->current_set,
             'serving' => $this->serving,
+            'theme' => [
+                'primary' => $this->theme_primary ?? '#001c54',
+                'accent' => $this->theme_accent ?? '#c00000',
+            ],
             'isFinished' => $this->is_finished,
         ];
     }

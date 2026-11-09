@@ -112,6 +112,10 @@
           <img src="{{ $match->logo }}" alt="Logo Event" style="display:block;height:48px;margin-bottom:6px;" />
         @endif
         <input type="file" name="logo" accept="image/*" />
+        <label>Warna Utama Overlay (hex)</label>
+        <input type="text" name="theme_primary" value="{{ $match->theme_primary ?? '#001c54' }}" maxlength="7" placeholder="#001c54" />
+        <label>Warna Aksen Overlay (hex)</label>
+        <input type="text" name="theme_accent" value="{{ $match->theme_accent ?? '#c00000' }}" maxlength="7" placeholder="#c00000" />
       </div>
 
       <button type="submit" class="btn">{{ $isNewMatch ? 'Mulai Pertandingan' : 'Simpan Pengaturan' }}</button>
