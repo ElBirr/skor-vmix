@@ -43,7 +43,7 @@ body {
   position: absolute;
   top: 68px;
   left: 67px;
-  width: 391px;
+  width: max-content;
   height: 81px;
 }
 
@@ -72,14 +72,16 @@ body {
   object-fit: contain;
 }
 
+/* Lebar panel mengikuti nama tim terpanjang (minimal ukuran desain GT). */
 .bug-panel {
-  position: absolute;
-  top: 0;
-  left: 82px;
+  position: relative;
   display: flex;
   flex-direction: column;
-  width: 309px;
+  width: max-content;
+  min-width: 309px;
+  max-width: 760px;
   height: 81px;
+  margin-left: 82px;
   background: var(--gt-navy-90);
   border: 2px solid var(--gt-white);
   overflow: hidden;
@@ -102,7 +104,7 @@ body {
   align-items: center;
   gap: 6px;
   min-width: 0;
-  padding-left: 4px;
+  padding: 0 12px 0 4px;
 }
 
 .bug-color {
@@ -350,10 +352,10 @@ body {
   position: absolute;
   top: 79px;
   left: 82px;
+  right: 0;
   display: flex;
   align-items: center;
   gap: 8px;
-  width: 309px;
   height: 34px;
   padding: 0 10px 0 0;
   background: var(--gt-white);
@@ -434,31 +436,6 @@ body {
 
 .bug-tag.is-timeout .bug-tag-progress {
   background: var(--gt-white);
-}
-
-/* Titik jatah timeout: putih = masih ada, redup = sudah dipakai */
-.bug-timeouts {
-  display: flex;
-  gap: 4px;
-  margin-left: auto;
-  margin-right: 8px;
-}
-
-.bug-timeouts i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--gt-white);
-  transition: opacity 0.3s, transform 0.3s;
-}
-
-.bug-timeouts i.is-used {
-  opacity: 0.25;
-  transform: scale(0.7);
-}
-
-.bug-timeouts + .bug-serve {
-  margin-left: 0;
 }
 
 /* Kartu akhir set */

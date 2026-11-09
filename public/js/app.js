@@ -41,8 +41,6 @@
     introAwayTeam: document.getElementById("introAwayTeam"),
     homeServe: document.getElementById("homeServe"),
     awayServe: document.getElementById("awayServe"),
-    homeTimeouts: document.getElementById("homeTimeouts"),
-    awayTimeouts: document.getElementById("awayTimeouts"),
     bugTag: document.getElementById("bugTag"),
     bugTagColor: document.getElementById("bugTagColor"),
     bugTagLabel: document.getElementById("bugTagLabel"),
@@ -222,7 +220,6 @@
     setScore(els.homeScore, "home", model.home.score);
     setScore(els.awayScore, "away", model.away.score);
     renderServe(model);
-    renderTimeouts(model);
     renderTag(model);
     els.homeSetsWon.textContent = model.sport === "volley" ? model.home.setsWon : "";
     els.awaySetsWon.textContent = model.sport === "volley" ? model.away.setsWon : "";
@@ -340,17 +337,6 @@
     els.bugTagClock.hidden = !content.clock;
     els.bugTagClock.textContent = content.clock || "";
     els.bugTagProgress.style.transform = "scaleX(" + (content.progress || 0) + ")";
-  }
-
-  // Titik sisa jatah timeout (voli: 2 per set).
-  function renderTimeouts(model) {
-    ["home", "away"].forEach(function (side) {
-      var dots = els[side + "Timeouts"];
-      dots.hidden = model.sport !== "volley";
-      Array.prototype.forEach.call(dots.children, function (dot, i) {
-        dot.classList.toggle("is-used", i < model[side].timeouts);
-      });
-    });
   }
 
   // Warna tema dari pengaturan (warna utama dan aksen).
