@@ -84,6 +84,48 @@ class MatchTest extends TestCase
         $this->assertSame(0, Pertandingan::active()->first()->away_timeouts);
     }
 
+    public function test_overlay_api_reports_running_timeout_until_it_expires(): void
+    {
+        $this->createMatch();
+        $this->getJson('/api/match')->assertJsonPath('timeout', null);
+
+        $this->postJson('/match/timeout', ['side' => 'away', 'delta' => 1])->assertOk();
+        $this->getJson('/api/match')
+            ->assertJsonPath('timeout.side', 'away')
+            ->assertJsonPath('timeout.duration', 30);
+
+        $this->travel(31)->seconds();
+        $this->getJson('/api/match')->assertJsonPath('timeout', null);
+    }
+
+    public function test_overlay_api_clears_timeout_after_correction(): void
+    {
+        $this->createMatch();
+
+        $this->postJson('/match/timeout', ['side' => 'home', 'delta' => 1])->assertOk();
+        $this->postJson('/match/timeout', ['side' => 'home', 'delta' => -1, 'reason' => 'Salah tekan'])->assertOk();
+
+        $this->getJson('/api/match')->assertJsonPath('timeout', null);
+    }
+
+    public function test_theme_colors_are_saved_and_carried_to_next_match(): void
+    {
+        $this->createMatch();
+
+        $match = Pertandingan::active()->first();
+        $this->post('/match', [
+            ...$match->only(['sport', 'period', 'home_name', 'away_name', 'home_color', 'away_color']),
+            'theme_primary' => '#112233',
+            'theme_accent' => '#ff8800',
+        ])->assertRedirect();
+
+        $this->getJson('/api/match')
+            ->assertJsonPath('theme.primary', '#112233')
+            ->assertJsonPath('theme.accent', '#ff8800');
+
+        $this->assertSame('#ff8800', Pertandingan::newMatch()->theme_accent);
+    }
+
     public function test_volleyball_set_requires_a_two_point_lead(): void
     {
         $this->createMatch();

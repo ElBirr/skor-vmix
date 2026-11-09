@@ -91,6 +91,7 @@ body {
 }
 
 .bug-line {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px 42px;
   flex: 1;
@@ -174,7 +175,7 @@ body {
 }
 
 .intro.is-entering {
-  animation: introIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation: introIn 0.2s linear;
 }
 
 .intro.is-leaving {
@@ -198,6 +199,7 @@ body {
 }
 
 .intro-panel {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -264,6 +266,7 @@ body {
 }
 
 .intro-team {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -330,6 +333,289 @@ body {
   display: block;
 }
 
+/* ---------- Bola servis & label servis/timeout ---------- */
+.bug-serve {
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  margin-left: auto;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #fff 0 30%, #ffd400 31% 100%);
+  box-shadow: 0 0 0 2px var(--gt-white);
+  animation: servePulse 1.4s ease-in-out infinite;
+}
+
+.bug-score.is-bumped {
+  animation: scoreBump 0.6s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.bug-tag {
+  --tag-color: var(--home-color);
+  position: absolute;
+  top: 79px;
+  left: 82px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 309px;
+  height: 34px;
+  padding: 0 10px 0 0;
+  background: var(--gt-white);
+  border: 2px solid var(--gt-white);
+  border-top: 0;
+  color: var(--gt-navy);
+  overflow: hidden;
+  transform-origin: top center;
+  z-index: -1;
+}
+
+.bug-tag.is-showing {
+  animation: tagIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.bug-tag.is-hiding {
+  animation: tagOut 0.3s cubic-bezier(0.55, 0, 1, 0.45) forwards;
+}
+
+.bug-tag-color {
+  flex: 0 0 9px;
+  align-self: stretch;
+  background: var(--tag-color);
+}
+
+.bug-tag-label {
+  padding: 3px 8px;
+  background: var(--gt-navy);
+  color: var(--gt-white);
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+
+.bug-tag-team {
+  flex: 1;
+  min-width: 0;
+  font-size: 19px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bug-tag-clock {
+  font-size: 20px;
+  font-weight: 900;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.bug-tag-progress {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4px;
+  background: var(--gt-red);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 1s linear;
+}
+
+.bug-tag.is-timeout {
+  background: var(--gt-red);
+  border-color: var(--gt-red);
+  color: var(--gt-white);
+}
+
+.bug-tag.is-timeout .bug-tag-label {
+  background: var(--gt-white);
+  color: var(--gt-red);
+  animation: timeoutBlink 1s steps(2, jump-none) infinite;
+}
+
+.bug-tag.is-timeout .bug-tag-progress {
+  background: var(--gt-white);
+}
+
+/* Titik jatah timeout: putih = masih ada, redup = sudah dipakai */
+.bug-timeouts {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+  margin-right: 8px;
+}
+
+.bug-timeouts i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--gt-white);
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.bug-timeouts i.is-used {
+  opacity: 0.25;
+  transform: scale(0.7);
+}
+
+.bug-timeouts + .bug-serve {
+  margin-left: 0;
+}
+
+/* Kartu akhir set */
+.bug-tag.is-set {
+  background: var(--gt-navy);
+  border-color: var(--gt-white);
+  color: var(--gt-white);
+}
+
+.bug-tag.is-set .bug-tag-label {
+  background: var(--gt-white);
+  color: var(--gt-navy);
+}
+
+/* Banner set point / match point */
+.bug-tag.is-point {
+  background: #ffd400;
+  border-color: #ffd400;
+  color: var(--gt-navy);
+}
+
+.bug-tag.is-point .bug-tag-label {
+  background: var(--gt-red);
+  animation: pointPulse 0.9s ease-in-out infinite;
+}
+
+@keyframes pointPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+/* ---------- Koreografi masuk scene live ---------- */
+.scorebug.is-entering .bug-panel {
+  animation: wipeRight 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.1s both;
+}
+
+.scorebug.is-entering .bug-logo {
+  animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.scorebug.is-entering .bug-line {
+  animation: slideInLeft 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.scorebug.is-entering .bug-line:first-child {
+  animation-delay: 0.3s;
+}
+
+.scorebug.is-entering .bug-line + .bug-line {
+  animation-delay: 0.4s;
+}
+
+/* ---------- Koreografi scene mulai/selesai ---------- */
+.intro-vs {
+  color: var(--gt-white);
+  font-size: 72px;
+  font-weight: 900;
+  font-style: italic;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  text-shadow: 0 4px 0 var(--gt-red);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.scene-end .intro-vs {
+  font-style: normal;
+  font-size: 96px;
+}
+
+.intro-shine {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.intro-shine::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -40%;
+  width: 30%;
+  height: 140%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.22), transparent);
+  transform: skewX(-20deg);
+  animation: shine 6s ease-in-out 1.4s infinite;
+}
+
+.intro-team::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 12px;
+  background: var(--home-color);
+}
+
+.intro-team-home::before {
+  left: 0;
+}
+
+.intro-team-away::before {
+  right: 0;
+  background: var(--away-color);
+}
+
+.scene-end .intro-team.is-winner .intro-team-name {
+  animation: winnerGlow 2s ease-in-out 1.9s infinite;
+}
+
+.scene-end .intro-team:not(.is-winner) {
+  opacity: 0.75;
+}
+
+.intro.is-entering .intro-panel {
+  animation: wipeOpen 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.intro.is-entering .intro-headline {
+  animation: dropIn 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) 0.25s both;
+}
+
+.intro.is-entering .intro-logo-home {
+  animation: logoInLeft 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+}
+
+.intro.is-entering .intro-logo-away {
+  animation: logoInRight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s both;
+}
+
+.intro.is-entering .intro-vs {
+  animation: vsSlam 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s both;
+}
+
+.intro.is-entering .intro-strip {
+  animation: riseIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) 0.8s both;
+}
+
+.intro.is-entering .intro-team-home {
+  animation: slideInLeft 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.9s both;
+}
+
+.intro.is-entering .intro-team-away {
+  animation: slideInRight 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) 0.9s both;
+}
+
+.intro.is-entering .intro-set {
+  animation: riseIn 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: calc(1.1s + var(--i, 0) * 0.1s);
+}
+
 /* ---------- Tampilkan hanya scene yang aktif ---------- */
 .scene-live .intro,
 .scene-start .scorebug,
@@ -362,11 +648,9 @@ body {
 @keyframes introIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(140px);
   }
   to {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(0);
   }
 }
 
@@ -381,12 +665,101 @@ body {
   }
 }
 
+@keyframes wipeRight {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes wipeOpen {
+  from { clip-path: inset(0 50% 0 50%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.3) rotate(-90deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(60px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes riseIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes logoInLeft {
+  from { opacity: 0; transform: translateX(-120px) scale(0.4) rotate(-25deg); }
+  to { opacity: 1; transform: translateX(0) scale(1) rotate(0); }
+}
+
+@keyframes logoInRight {
+  from { opacity: 0; transform: translateX(120px) scale(0.4) rotate(25deg); }
+  to { opacity: 1; transform: translateX(0) scale(1) rotate(0); }
+}
+
+@keyframes vsSlam {
+  from { opacity: 0; transform: scale(3); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shine {
+  0%, 70% { left: -40%; }
+  100% { left: 130%; }
+}
+
+@keyframes winnerGlow {
+  0%, 100% { color: var(--gt-white); text-shadow: none; }
+  50% { color: #ffd400; text-shadow: 0 0 18px rgba(255, 212, 0, 0.8); }
+}
+
+@keyframes scoreBump {
+  0% { transform: scale(1); background: var(--gt-silver); }
+  30% { transform: scale(1.35); background: #ffd400; }
+  100% { transform: scale(1); background: var(--gt-silver); }
+}
+
+@keyframes servePulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+@keyframes tagIn {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes tagOut {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-100%); opacity: 0; }
+}
+
+@keyframes timeoutBlink {
+  0% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .scorebug.is-entering,
   .scorebug.is-leaving,
   .intro.is-entering,
-  .intro.is-leaving {
-    animation: none;
+  .intro.is-leaving,
+  .overlay *,
+  .overlay *::before,
+  .overlay *::after {
+    animation: none !important;
   }
 }
 

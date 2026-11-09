@@ -23,6 +23,8 @@ class Pertandingan extends Model
         'status',
         'home_color',
         'away_color',
+        'theme_primary',
+        'theme_accent',
         'logo',
         'set_scores',
         'current_set',
@@ -51,7 +53,12 @@ class Pertandingan extends Model
 
     public static function newMatch(): self
     {
+        // Tema warna mengikuti pertandingan terakhir supaya satu event tetap seragam.
+        $previous = self::latest('id')->first();
+
         return new self([
+            'theme_primary' => $previous->theme_primary ?? '#001c54',
+            'theme_accent' => $previous->theme_accent ?? '#c00000',
             'is_active' => true,
             'is_finished' => false,
             'sport' => 'volley',
@@ -98,6 +105,48 @@ class Pertandingan extends Model
             && abs($this->home_score - $this->away_score) >= 2;
     }
 
+    /**
+     * Lama timeout resmi dalam detik per cabang olahraga.
+     */
+    public function timeoutDuration(): int
+    {
+        return $this->sport === 'futsal' ? 60 : 30;
+    }
+
+    /**
+     * Timeout yang sedang berjalan, diambil dari event audit timeout terakhir.
+     *
+     * @return array{side: string, remaining: int, duration: int}|null
+     */
+    public function activeTimeout(): ?array
+    {
+        $event = MatchEvent::where('match_id', $this->id)
+            ->whereIn('type', ['timeout_used', 'timeout_corrected'])
+            ->latest('id')
+            ->first();
+
+        if (! $event || $event->type !== 'timeout_used') {
+            return null;
+        }
+
+        $duration = $this->timeoutDuration();
+        $remaining = $duration - (int) $event->created_at->diffInSeconds(now());
+
+        if ($remaining <= 0) {
+            return null;
+        }
+
+        $side = collect(['home', 'away'])->first(
+            fn (string $side): bool => ($event->after[$side]['timeouts'] ?? 0) > ($event->before[$side]['timeouts'] ?? 0)
+        );
+
+        if (! $side) {
+            return null;
+        }
+
+        return ['side' => $side, 'remaining' => $remaining, 'duration' => $duration];
+    }
+
     public function toOverlayArray(): array
     {
         $setsWon = $this->setsWon();
@@ -129,6 +178,10 @@ class Pertandingan extends Model
             'sets' => $this->set_scores ?? [],
             'currentSet' => $this->current_set,
             'serving' => $this->serving,
+            'theme' => [
+                'primary' => $this->theme_primary ?? '#001c54',
+                'accent' => $this->theme_accent ?? '#c00000',
+            ],
             'isFinished' => $this->is_finished,
         ];
     }

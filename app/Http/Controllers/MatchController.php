@@ -25,7 +25,10 @@ class MatchController extends Controller
             return response()->json(null, 404);
         }
 
-        return response()->json($match->toOverlayArray());
+        return response()->json([
+            ...$match->toOverlayArray(),
+            'timeout' => $match->is_finished ? null : $match->activeTimeout(),
+        ]);
     }
 
     public function update(Request $request)
@@ -279,7 +282,16 @@ class MatchController extends Controller
             'status' => 'nullable|string|max:20',
             'home_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
             'away_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'theme_primary' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'theme_accent' => ['nullable', 'regex:/^#[0-9A-Fa-f]{6}$/'],
         ]);
+
+        // Tema tidak dikirim: pertahankan tema yang sudah tersimpan.
+        foreach (['theme_primary', 'theme_accent'] as $field) {
+            if (($data[$field] ?? null) === null) {
+                unset($data[$field]);
+            }
+        }
 
         foreach (['clock', 'status', 'home_sub', 'away_sub'] as $field) {
             if (($data[$field] ?? null) === null) {
