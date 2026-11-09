@@ -556,3 +556,51 @@ input::placeholder {
   font-family: ui-monospace, Menlo, Consolas, monospace;
   text-transform: lowercase;
 }
+
+/* Tombol besar di halaman Kontrol vMix */
+.control-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.control-grid form {
+  margin: 0;
+}
+
+.control-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 14px;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  color: var(--gt-white);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.control-btn strong {
+  font-size: 17px;
+  text-transform: uppercase;
+}
+
+.control-btn span {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+.control-btn.is-on {
+  background: var(--gt-white);
+  color: var(--gt-navy);
+  border-color: var(--gt-white);
+}
+
+.control-btn:disabled {
+  opacity: 0.6;
+}

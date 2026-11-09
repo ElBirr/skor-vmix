@@ -115,6 +115,8 @@
         <h2>Opsi Tampilan</h2>
         <label>Judul Headline Opening/Hasil (kosong = nama olahraga)</label>
         <input type="text" name="headline" value="{{ old('headline', $match->headline) }}" maxlength="40" placeholder="mis. PORPROV 2026 / FINAL VOLI PUTRA" />
+        <label>Babak / Grup (tampil di Opening &amp; Hasil Akhir)</label>
+        <input type="text" name="round" value="{{ old('round', $match->round) }}" maxlength="40" placeholder="mis. SEMIFINAL / GRUP A" />
         <div class="row">
           <div>
             <label>Venue / Lokasi (tampil di Opening)</label>

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\LowerThird;
 use App\Models\Pertandingan;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,6 +44,21 @@ class OverlayControlTest extends TestCase
         $second = $this->postJson('/overlay/serve-cue')->json('serveCue');
 
         $this->assertGreaterThan($first, $second);
+    }
+
+    public function test_finishing_match_hides_every_overlay(): void
+    {
+        $this->actingAs(User::factory()->create());
+        Pertandingan::newMatch()->save();
+        $lowerThird = LowerThird::factory()->live()->create();
+
+        $this->post('/match/finish')->assertRedirect('/settings');
+
+        $this->getJson('/api/match?latest=1')
+            ->assertJsonPath('overlay.live', false)
+            ->assertJsonPath('overlay.start', false)
+            ->assertJsonPath('overlay.end', false);
+        $this->assertFalse($lowerThird->fresh()->is_live);
     }
 
     public function test_invalid_scene_is_rejected(): void

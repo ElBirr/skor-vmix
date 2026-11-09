@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 class Pertandingan extends Model
 {
@@ -22,6 +23,7 @@ class Pertandingan extends Model
         'clock',
         'status',
         'headline',
+        'round',
         'venue',
         'match_date',
         'home_color',
@@ -149,7 +151,155 @@ class Pertandingan extends Model
             return null;
         }
 
+        // Posisi tim ditukar setelah timeout dimulai: sisinya ikut ditukar.
+        $swaps = MatchEvent::where('match_id', $this->id)
+            ->where('type', 'sides_swapped')
+            ->where('id', '>', $event->id)
+            ->count();
+        if ($swaps % 2 === 1) {
+            $side = $side === 'home' ? 'away' : 'home';
+        }
+
         return ['side' => $side, 'remaining' => $remaining, 'duration' => $duration];
+    }
+
+    /**
+     * Tukar posisi tim home dan away (nama, logo, warna, skor, timeout, servis, riwayat set).
+     */
+    public function swapSides(): void
+    {
+        foreach (['name', 'sub', 'logo', 'score', 'color', 'timeouts'] as $field) {
+            [$this->{'home_'.$field}, $this->{'away_'.$field}] = [$this->{'away_'.$field}, $this->{'home_'.$field}];
+        }
+
+        $this->serving = match ($this->serving) {
+            'home' => 'away',
+            'away' => 'home',
+            default => $this->serving,
+        };
+
+        $this->set_scores = array_map(
+            fn (array $set): array => ['home' => $set['away'] ?? 0, 'away' => $set['home'] ?? 0],
+            $this->set_scores ?? [],
+        );
+    }
+
+    /**
+     * Statistik ringkas untuk scene hasil akhir (voli).
+     *
+     * @return array{totals: array{home: int, away: int}, longestRun: array{home: int, away: int}}
+     */
+    public function matchStats(): array
+    {
+        $sets = $this->set_scores ?? [];
+        $totals = ['home' => 0, 'away' => 0];
+        foreach ($sets as $set) {
+            $totals['home'] += (int) ($set['home'] ?? 0);
+            $totals['away'] += (int) ($set['away'] ?? 0);
+        }
+
+        // Set terakhir sudah masuk set_scores saat pertandingan selesai.
+        if (! $this->is_finished) {
+            $totals['home'] += $this->home_score;
+            $totals['away'] += $this->away_score;
+        }
+
+        return ['totals' => $totals, 'longestRun' => $this->longestRuns()];
+    }
+
+    /**
+     * Lama pertandingan dalam menit, dari poin pertama sampai poin terakhir / selesai.
+     */
+    public function durationMinutes(): ?int
+    {
+        $events = MatchEvent::where('match_id', $this->id)
+            ->whereIn('type', ['point_awarded', 'match_finished'])
+            ->selectRaw('MIN(created_at) as started, MAX(created_at) as ended')
+            ->first();
+
+        if (! $events?->started || ! $events->ended) {
+            return null;
+        }
+
+        return (int) round(Carbon::parse($events->started)->diffInSeconds(Carbon::parse($events->ended)) / 60);
+    }
+
+    /**
+     * Poin beruntun terpanjang tiap tim, dihitung dari urutan event poin.
+     *
+     * @return array{home: int, away: int}
+     */
+    private function longestRuns(): array
+    {
+        $sequence = [];
+        $events = MatchEvent::where('match_id', $this->id)
+            ->whereIn('type', ['point_awarded', 'score_corrected', 'sides_swapped'])
+            ->orderBy('id')
+            ->get(['type', 'before', 'after']);
+
+        foreach ($events as $event) {
+            // Posisi ditukar: semua poin sebelumnya ikut pindah sisi.
+            if ($event->type === 'sides_swapped') {
+                $sequence = array_map(fn (string $side): string => $side === 'home' ? 'away' : 'home', $sequence);
+
+                continue;
+            }
+
+            $side = $this->scoringSide($event->before ?? [], $event->after ?? [], $event->type === 'point_awarded');
+
+            if (! $side) {
+                continue;
+            }
+
+            if ($event->type === 'point_awarded') {
+                $sequence[] = $side;
+
+                continue;
+            }
+
+            // Koreksi skor: batalkan poin terakhir milik tim tersebut.
+            $index = array_search($side, array_reverse($sequence, true), true);
+            if ($index !== false) {
+                unset($sequence[$index]);
+                $sequence = array_values($sequence);
+            }
+        }
+
+        $runs = ['home' => 0, 'away' => 0];
+        $current = null;
+        $length = 0;
+        foreach ($sequence as $side) {
+            $length = $side === $current ? $length + 1 : 1;
+            $current = $side;
+            $runs[$side] = max($runs[$side], $length);
+        }
+
+        return $runs;
+    }
+
+    /**
+     * Tim yang skornya naik (poin) atau turun (koreksi) pada satu event.
+     */
+    private function scoringSide(array $before, array $after, bool $increase): ?string
+    {
+        $setsBefore = count($before['sets'] ?? []);
+        $setsAfter = count($after['sets'] ?? []);
+
+        // Poin penentu set: skor direset, jadi lihat pemenang set yang baru tercatat.
+        if ($increase && $setsAfter > $setsBefore) {
+            $last = end($after['sets']);
+
+            return ($last['home'] ?? 0) >= ($last['away'] ?? 0) ? 'home' : 'away';
+        }
+
+        foreach (['home', 'away'] as $side) {
+            $delta = ($after[$side]['score'] ?? 0) - ($before[$side]['score'] ?? 0);
+            if ($increase ? $delta > 0 : $delta < 0) {
+                return $side;
+            }
+        }
+
+        return null;
     }
 
     public function toOverlayArray(): array
@@ -181,6 +331,7 @@ class Pertandingan extends Model
             'clock' => $this->clock,
             'status' => $this->status,
             'headline' => (string) $this->headline,
+            'round' => (string) $this->round,
             'venue' => (string) $this->venue,
             'date' => $this->match_date?->toDateString() ?? '',
             'sets' => $this->set_scores ?? [],

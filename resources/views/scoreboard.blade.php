@@ -304,6 +304,7 @@
       </div>
       <div class="topbar-right">
         <a href="{{ route('overlay') }}" target="_blank" class="btn-link">vMix Overlay</a>
+        <a href="{{ route('control') }}" class="btn-link">Kontrol vMix</a>
         <a href="{{ route('lower-thirds.index') }}" class="btn-link">Lower Third</a>
         <a href="{{ route('history') }}" class="btn-link">Riwayat</a>
         <a href="{{ route('account.edit') }}" class="btn-link">Akun</a>
@@ -374,6 +375,10 @@
             <span id="servingOut">Serve: {{ strtoupper($match->serving ?: '-') }}</span>
           </button>
         @endif
+        <button type="button" class="ctrl-btn" id="swapSidesBtn">
+          Tukar Posisi
+          <span>Home &harr; Away</span>
+        </button>
       </div>
       <div class="controls-group">
         <div class="timeout-box">
@@ -551,6 +556,16 @@
         if (res) applyState(res);
       });
     }
+
+    // Tukar posisi tim (pindah lapangan): semua data home/away ditukar di server.
+    const swapSidesBtn = document.getElementById('swapSidesBtn');
+    swapSidesBtn.addEventListener('click', async () => {
+      if (!confirm('Tukar posisi tim? Nama, logo, warna, skor, timeout, servis, dan riwayat set akan ditukar.')) return;
+      swapSidesBtn.disabled = true;
+      const res = await postJson('{{ route('match.swap') }}', {});
+      if (res) location.reload();
+      swapSidesBtn.disabled = false;
+    });
 
     // Sinkron dari server (perubahan settings / perangkat lain)
     setInterval(refresh, 1000);

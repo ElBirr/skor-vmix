@@ -22,7 +22,12 @@
           <span class="bug-name">
             <span class="bug-color" id="homeColor"></span>
             <span class="bug-team" id="homeName">HOME</span>
-            <span class="bug-serve" id="homeServe" hidden></span>
+            <span class="bug-serve" id="homeServe"></span>
+            <span class="bug-goal" aria-hidden="true">
+              <img class="bug-goal-mark" id="homeGoalMark" alt="" hidden />
+              <img class="bug-goal-logo" id="homeGoalLogo" alt="" hidden />
+              <span class="bug-goal-text">POIN!</span>
+            </span>
           </span>
           <span class="bug-sets" id="homeSetsWon">0</span>
           <span class="bug-score" id="homeScore">0</span>
@@ -31,7 +36,12 @@
           <span class="bug-name">
             <span class="bug-color" id="awayColor"></span>
             <span class="bug-team" id="awayName">AWAY</span>
-            <span class="bug-serve" id="awayServe" hidden></span>
+            <span class="bug-serve" id="awayServe"></span>
+            <span class="bug-goal" aria-hidden="true">
+              <img class="bug-goal-mark" id="awayGoalMark" alt="" hidden />
+              <img class="bug-goal-logo" id="awayGoalLogo" alt="" hidden />
+              <span class="bug-goal-text">POIN!</span>
+            </span>
           </span>
           <span class="bug-sets" id="awaySetsWon">0</span>
           <span class="bug-score" id="awayScore">0</span>
@@ -48,13 +58,27 @@
       </div>
     </div>
 
+    {{-- Banner pergantian set (scene live) --}}
+    <div class="set-banner" id="setBanner" hidden>
+      <span class="set-banner-logo"><img id="setBannerLogo" alt="" hidden /></span>
+      <span class="set-banner-body">
+        <span class="set-banner-label" id="setBannerLabel">SET 1 MILIK</span>
+        <span class="set-banner-team" id="setBannerTeam">TIM</span>
+      </span>
+      <span class="set-banner-score" id="setBannerScore">25 - 21</span>
+    </div>
+
     {{-- Layar mulai/selesai (GT 01 VOLLEYBALL 2 OPENING B) --}}
     <div class="intro" id="intro" aria-hidden="true">
       <div class="intro-event-logo" id="introEventLogo" hidden>
         <img id="introEventLogoImg" alt="" />
       </div>
       <div class="intro-headline" id="introSport">VOLI</div>
+      <div class="intro-round" id="introRound" hidden></div>
       <div class="intro-panel">
+        <span class="intro-half intro-half-home" aria-hidden="true"></span>
+        <span class="intro-half intro-half-away" aria-hidden="true"></span>
+        <span class="intro-impact" aria-hidden="true"></span>
         <span class="intro-shine" aria-hidden="true"></span>
         <div class="intro-logo intro-logo-home">
           <img id="introHomeLogo" alt="" hidden />
@@ -79,6 +103,7 @@
         </div>
       </div>
       <div class="intro-sets" id="introSets" hidden></div>
+      <div class="intro-stats" id="introStats" hidden></div>
     </div>
   </div>
 

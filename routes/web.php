@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\LowerThirdController;
 use App\Http\Controllers\MatchController;
 use App\Http\Controllers\OverlayController;
+use App\Models\LowerThird;
 use App\Models\MatchEvent;
 use App\Models\Pertandingan;
 use Illuminate\Http\Request;
@@ -80,8 +81,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/match', [MatchController::class, 'update'])->name('match.update');
     Route::post('/match/finish', [MatchController::class, 'finish'])->name('match.finish');
     Route::post('/match/score', [MatchController::class, 'adjustScore'])->name('match.score');
+    Route::post('/match/swap', [MatchController::class, 'swapSides'])->name('match.swap');
     Route::post('/match/serve', [MatchController::class, 'setServe'])->name('match.serve');
     Route::post('/match/timeout', [MatchController::class, 'adjustTimeout'])->name('match.timeout');
+    Route::get('/control', function () {
+        return view('control', [
+            'overlayState' => OverlayController::state(),
+            'lowerThirds' => LowerThird::orderBy('title')->get(),
+            'currentLowerThird' => LowerThird::current(),
+        ]);
+    })->name('control');
     Route::post('/overlay/visibility', [OverlayController::class, 'updateVisibility'])->name('overlay.visibility');
     Route::post('/overlay/serve-cue', [OverlayController::class, 'cueServe'])->name('overlay.serve-cue');
 

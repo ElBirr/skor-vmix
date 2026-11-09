@@ -58,6 +58,9 @@
   var VALID_SIDES = ["home", "away"];
   var lastScores = { home: null, away: null };
   var lastSetsWon = { home: null, away: null };
+  // Posisi tim ditukar: skor berpindah baris, jangan dianggap poin baru.
+  var lastTeamNames = null;
+  var sidesJustSwapped = false;
   // Label SERVIS hanya tampil sebentar setiap kali servis berpindah.
   var SERVE_TAG_MS = 8000;
   var serveTag = { side: "", until: 0 };
@@ -124,11 +127,14 @@
       currentSet: 1,
       headline: "",
       venue: "",
+      round: "",
+      durationMinutes: null,
       date: "",
       sets: [],
       serving: "",
       timeout: null,
       isFinished: false,
+      stats: null,
       theme: { primary: "#001c54", accent: "#c00000" }
     };
   }
@@ -146,6 +152,8 @@
     model.currentSet = clampInt(data.currentSet, 1, 5, 1);
     model.headline = sanitizeText(data.headline, "", 40);
     model.venue = sanitizeText(data.venue, "", 60);
+    model.round = sanitizeText(data.round, "", 40);
+    model.durationMinutes = data.durationMinutes == null ? null : clampInt(data.durationMinutes, 0, 1440, 0);
     model.date = /^\d{4}-\d{2}-\d{2}$/.test(data.date || "") ? data.date : "";
 
     if (Array.isArray(data.sets)) {
@@ -158,6 +166,18 @@
     }
 
     model.isFinished = data.isFinished === true;
+    if (data.stats && data.stats.totals && data.stats.longestRun) {
+      model.stats = {
+        totals: {
+          home: clampInt(data.stats.totals.home, 0, 9999, 0),
+          away: clampInt(data.stats.totals.away, 0, 9999, 0)
+        },
+        longestRun: {
+          home: clampInt(data.stats.longestRun.home, 0, 999, 0),
+          away: clampInt(data.stats.longestRun.away, 0, 999, 0)
+        }
+      };
+    }
     if (data.theme) {
       model.theme.primary = sanitizeHex(data.theme.primary, model.theme.primary);
       model.theme.accent = sanitizeHex(data.theme.accent, model.theme.accent);
@@ -232,6 +252,10 @@
     // Papan skor pojok kiri
     els.homeName.textContent = model.home.name;
     els.awayName.textContent = model.away.name;
+    var teamNames = model.home.name + "|" + model.away.name;
+    sidesJustSwapped = lastTeamNames === model.away.name + "|" + model.home.name && model.home.name !== model.away.name;
+    lastTeamNames = teamNames;
+    renderGoalBanner(model);
     setScore(els.homeScore, "home", model.home.score);
     setScore(els.awayScore, "away", model.away.score);
     renderServe(model);
@@ -249,6 +273,7 @@
     renderTeamLogo(els.introHomeLogo, els.introHomeFallback, model.home);
     renderTeamLogo(els.introAwayLogo, els.introAwayFallback, model.away);
     renderSetHistory(model);
+    renderStats(model);
   }
 
   // Nama tim panjang: kecilkan huruf sampai muat, lalu pecah 2 baris bila perlu.
@@ -293,9 +318,52 @@
   }
 
   // Skor berubah: animasi "pop" supaya penonton sadar ada poin baru.
+  // Efek poin bertambah lewat ?scoreFx=, bisa digabung dengan koma: hop,shine,goal.
+  // Default hop,goal. "both" = hop,shine, "none" = tanpa efek tambahan.
+  var SCORE_FX = (function () {
+    var raw = (params.get("scoreFx") || "hop,goal").toLowerCase();
+    if (raw === "both") raw = "hop,shine";
+    return raw.split(",").map(function (fx) { return fx.trim(); });
+  })();
+
+  function hasFx(name) {
+    return SCORE_FX.indexOf(name) !== -1;
+  }
+
+  // Bilah POIN!/GOL!: teks sesuai olahraga, logo tim kecil + watermark bila ada.
+  function renderGoalBanner(model) {
+    var label = model.sport === "futsal" ? "GOL!" : "POIN!";
+    ["home", "away"].forEach(function (side) {
+      var logo = model[side].logo;
+      [document.getElementById(side + "GoalLogo"), document.getElementById(side + "GoalMark")].forEach(function (img) {
+        var usable = logo && img.dataset.failed !== logo;
+        img.hidden = !usable;
+        if (usable && img.getAttribute("src") !== logo) img.src = logo;
+      });
+      var banner = document.getElementById(side + "GoalLogo").parentNode;
+      banner.classList.toggle("has-logo", !!logo && !document.getElementById(side + "GoalLogo").hidden);
+      banner.querySelector(".bug-goal-text").textContent = label;
+    });
+  }
+
+  function hopBall(side) {
+    var ball = document.getElementById("bugLogo");
+    ball.classList.remove("hop-home", "hop-away");
+    void ball.offsetWidth;
+    ball.classList.add("hop-" + side);
+  }
+
   function setScore(el, side, score) {
     var changed = lastScores[side] !== null && lastScores[side] !== score;
-    if (changed && els.overlay.dataset.ready) replay(el, "is-bumped");
+    if (changed && els.overlay.dataset.ready && !sidesJustSwapped) {
+      replay(el, "is-bumped");
+      // Poin bertambah (bukan koreksi): bola memantul ke baris tim pencetak poin.
+      if (score > lastScores[side]) {
+        if (hasFx("hop")) hopBall(side);
+        if (hasFx("shine")) replay(el.parentNode, "is-shining");
+        if (hasFx("goal")) replay(el.parentNode.querySelector(".bug-name"), "is-goal");
+      }
+    }
     lastScores[side] = score;
     el.textContent = score;
   }
@@ -303,15 +371,16 @@
   // Jumlah set berubah: kotak set berkilat.
   function setSetsWon(el, side, value) {
     var changed = lastSetsWon[side] !== null && lastSetsWon[side] !== value;
-    if (changed && value !== "" && els.overlay.dataset.ready) replay(el, "is-bumped");
+    if (changed && value !== "" && els.overlay.dataset.ready && !sidesJustSwapped) replay(el, "is-bumped");
     lastSetsWon[side] = value;
     el.textContent = value;
   }
 
   function renderServe(model) {
     var serving = model.sport === "volley" ? model.serving : "";
-    els.homeServe.hidden = serving !== "home";
-    els.awayServe.hidden = serving !== "away";
+    // Ruang bola selalu disediakan di kedua baris supaya lebar papan tidak berubah.
+    els.homeServe.classList.toggle("is-on", serving === "home");
+    els.awayServe.classList.toggle("is-on", serving === "away");
   }
 
   // Kondisi set point / match point voli (best of 5, set ke-5 sampai 15).
@@ -336,6 +405,7 @@
 
     if (model.sets.length > setEnd.count && els.overlay.dataset.ready) {
       setEnd.until = now + SET_END_MS;
+      showSetBanner(model);
     }
     setEnd.count = model.sets.length;
 
@@ -469,14 +539,106 @@
     els.intro.classList.toggle("has-event-logo", !!logo && !model.headline);
     if (logo && els.introEventLogoImg.getAttribute("src") !== logo) els.introEventLogoImg.src = logo;
 
+    var round = document.getElementById("introRound");
+    round.textContent = model.round;
+    round.hidden = !model.round;
+
+    // Opening: venue & tanggal. Hasil akhir: durasi pertandingan.
     var parts = [];
-    if (model.venue) parts.push(model.venue);
-    if (model.date) {
-      var d = model.date.split("-");
-      parts.push(parseInt(d[2], 10) + " " + MONTHS[parseInt(d[1], 10) - 1] + " " + d[0]);
+    if (scene === "end") {
+      if (model.durationMinutes) parts.push("DURASI " + formatDuration(model.durationMinutes));
+    } else {
+      if (model.venue) parts.push(model.venue);
+      if (model.date) {
+        var d = model.date.split("-");
+        parts.push(parseInt(d[2], 10) + " " + MONTHS[parseInt(d[1], 10) - 1] + " " + d[0]);
+      }
     }
     els.introVenue.textContent = parts.join(" • ");
-    els.introVenue.hidden = scene !== "start" || parts.length === 0;
+    els.introVenue.hidden = parts.length === 0;
+  }
+
+  function formatDuration(minutes) {
+    var hours = Math.floor(minutes / 60);
+    var rest = minutes % 60;
+    if (!hours) return rest + " MENIT";
+    return hours + " JAM" + (rest ? " " + rest + " MENIT" : "");
+  }
+
+  // Banner besar di tengah bawah saat set selesai (scene live).
+  var SET_BANNER_MS = 6000;
+  var setBannerTimer = null;
+
+  function showSetBanner(model) {
+    if (scene !== "live" || !model.sets.length) return;
+    var banner = document.getElementById("setBanner");
+    var index = model.sets.length - 1;
+    var last = model.sets[index];
+    var side = last.home >= last.away ? "home" : "away";
+    var team = model[side];
+
+    document.getElementById("setBannerLabel").textContent = model.isFinished
+      ? "PEMENANG PERTANDINGAN"
+      : "SET " + (index + 1) + " MILIK";
+    document.getElementById("setBannerTeam").textContent = team.name;
+    document.getElementById("setBannerScore").textContent = model.isFinished
+      ? model.home.setsWon + " - " + model.away.setsWon
+      : last.home + " - " + last.away;
+
+    var logo = document.getElementById("setBannerLogo");
+    var usable = team.logo && logo.dataset.failed !== team.logo;
+    logo.hidden = !usable;
+    if (usable) logo.src = team.logo;
+    banner.classList.toggle("has-logo", !!usable);
+    banner.style.setProperty("--banner-color", team.color);
+
+    clearTimeout(setBannerTimer);
+    banner.hidden = false;
+    banner.classList.remove("is-leaving");
+    replay(banner, "is-showing");
+    setBannerTimer = setTimeout(function () {
+      banner.classList.remove("is-showing");
+      banner.classList.add("is-leaving");
+      setBannerTimer = setTimeout(function () {
+        banner.hidden = true;
+        banner.classList.remove("is-leaving");
+      }, 500);
+    }, SET_BANNER_MS);
+  }
+
+  // Statistik ringkas di scene selesai (voli).
+  function renderStats(model) {
+    var box = document.getElementById("introStats");
+    if (scene !== "end" || !model.stats) {
+      box.hidden = true;
+      box.dataset.key = "";
+      return;
+    }
+
+    var rows = [
+      ["TOTAL POIN", model.stats.totals],
+      ["POIN BERUNTUN TERPANJANG", model.stats.longestRun]
+    ];
+    var key = JSON.stringify(rows);
+    if (box.dataset.key === key) return;
+    box.dataset.key = key;
+
+    box.replaceChildren();
+    rows.forEach(function (row, i) {
+      var line = document.createElement("div");
+      line.className = "intro-stat";
+      line.style.setProperty("--i", i);
+      var home = row[1].home;
+      var away = row[1].away;
+      [[home, home > away], [row[0], false], [away, away > home]].forEach(function (cell, j) {
+        var span = document.createElement("span");
+        span.textContent = cell[0];
+        span.className = j === 1 ? "intro-stat-label" : "intro-stat-value" + (cell[1] ? " is-lead" : "");
+        line.appendChild(span);
+      });
+      box.appendChild(line);
+    });
+    box.hidden = false;
   }
 
   // Riwayat skor per set, hanya di scene selesai.
@@ -587,8 +749,18 @@
     return scene === "live" ? document.getElementById("scorebug") : els.intro;
   }
 
+  // Bersihkan sisa class efek poin; tanpa ini animasi lama ikut diputar ulang
+  // saat overlay yang tersembunyi ditampilkan kembali.
+  function clearScoreEffects() {
+    document.querySelectorAll(".is-bumped, .is-goal, .is-shining").forEach(function (node) {
+      node.classList.remove("is-bumped", "is-goal", "is-shining");
+    });
+    document.getElementById("bugLogo").classList.remove("hop-home", "hop-away");
+  }
+
   function playEnter() {
     var el = sceneEl();
+    clearScoreEffects();
     el.classList.remove("is-leaving", "is-entering");
     void el.offsetWidth; // paksa animasi bisa diulang
     el.classList.add("is-entering");
@@ -671,10 +843,11 @@
     els.overlay.dataset.out = "1";
     el.classList.remove("is-entering");
     el.classList.add("is-leaving");
+    // Durasi koreografi keluar: papan skor ±0,7 dtk, opening/hasil ±1 dtk.
     setTimeout(function () {
       els.overlay.hidden = true;
       el.classList.remove("is-leaving");
-    }, 360);
+    }, scene === "live" ? 700 : 1000);
   };
 
   window.overlayIn = function () {
@@ -686,6 +859,14 @@
   els.introEventLogoImg.addEventListener("error", function () {
     els.introEventLogoImg.dataset.failed = els.introEventLogoImg.getAttribute("src") || "";
     els.introEventLogo.hidden = true;
+  });
+  ["homeGoalLogo", "homeGoalMark", "awayGoalLogo", "awayGoalMark", "setBannerLogo"].forEach(function (id) {
+    var img = document.getElementById(id);
+    img.addEventListener("error", function () {
+      img.dataset.failed = img.getAttribute("src") || "";
+      img.hidden = true;
+      img.parentNode.classList.remove("has-logo");
+    });
   });
   wireLogoFallback(els.introHomeLogo, els.introHomeFallback);
   wireLogoFallback(els.introAwayLogo, els.introAwayFallback);
