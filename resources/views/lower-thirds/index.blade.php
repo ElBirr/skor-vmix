@@ -103,4 +103,5 @@
     </div>
   @endif
 </div>
+<script src="{{ asset('js/image-resize.js') }}"></script>
 @endsection

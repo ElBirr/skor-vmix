@@ -144,6 +144,14 @@ class MatchTest extends TestCase
             ->assertJsonPath('date', '2026-11-09');
     }
 
+    public function test_too_large_upload_shows_friendly_message(): void
+    {
+        $this->actingAs(User::factory()->create())
+            ->call('POST', '/match', [], [], [], ['CONTENT_LENGTH' => 50 * 1024 * 1024])
+            ->assertStatus(413)
+            ->assertSee('Upload terlalu besar');
+    }
+
     public function test_volleyball_set_requires_a_two_point_lead(): void
     {
         $this->createMatch();
