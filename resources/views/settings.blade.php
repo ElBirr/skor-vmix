@@ -23,7 +23,7 @@
         <a href="{{ route('history') }}" class="btn btn-secondary">Riwayat</a>
         <a href="{{ route('account.edit') }}" class="btn btn-secondary">Akun</a>
         @if (auth()->user()->isAdmin())
-          <a href="{{ route('admin.data') }}" class="btn btn-secondary">Data</a>
+          <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Admin</a>
         @endif
         @if (! $isNewMatch)<a href="{{ route('scoreboard') }}" class="btn btn-secondary">&larr; Layar Skor</a>@endif
       </div>

@@ -43,6 +43,7 @@ Papan skor lapangan untuk voli dan futsal, lengkap dengan overlay broadcast untu
 
 ### Admin
 - Halaman admin hanya untuk peran `admin`. Akun pertama yang dibuat lewat `/register` otomatis menjadi admin; akun baru dari halaman Operator otomatis menjadi operator.
+- `/admin` - pusat admin: ringkasan data, operator, sistem, backup, dan akun.
 - `/admin/data` - penjelajah data hanya-baca untuk `matches`, `match_events`, dan `users` (kolom password/token tidak pernah ditampilkan), dengan ekspor CSV per tabel.
 - `/admin/users` - tambah operator, ubah peran, aktif/nonaktifkan akun, reset sandi. Admin tidak bisa menonaktifkan atau menurunkan akun sendiri.
 - `/admin/system` - status PHP/Laravel/database/storage dan pembersihan file logo yang tidak dipakai.

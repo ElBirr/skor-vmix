@@ -15,7 +15,7 @@
         <a href="{{ route('settings') }}" class="btn btn-secondary">Pengaturan</a>
         <a href="{{ route('account.edit') }}" class="btn btn-secondary">Akun</a>
         @if (auth()->user()->isAdmin())
-          <a href="{{ route('admin.data') }}" class="btn btn-secondary">Data</a>
+          <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">Admin</a>
         @endif
       </div>
     </div>

@@ -8,6 +8,7 @@
     <p class="subtitle">{{ $rows->total() }} baris · halaman {{ $rows->currentPage() }} dari {{ $rows->lastPage() }}</p>
   </div>
   <div class="actions">
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">&larr; Admin</a>
     <a href="{{ route('admin.data') }}" class="btn btn-secondary">&larr; Data</a>
     <a href="{{ route('admin.data.export', $table) }}" class="btn">Ekspor CSV</a>
   </div>

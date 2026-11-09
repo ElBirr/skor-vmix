@@ -8,6 +8,7 @@
     <p class="subtitle">Kesehatan aplikasi dan pembersihan file logo.</p>
   </div>
   <div class="actions">
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">&larr; Admin</a>
     <a href="{{ route('admin.backup') }}" class="btn">Unduh Backup</a>
   </div>
 </div>

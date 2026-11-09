@@ -40,6 +40,7 @@ class AdminTest extends TestCase
     {
         $this->get('/admin/data')->assertRedirect('/login');
 
+        $this->actingAs($this->operator())->get('/admin')->assertForbidden();
         $this->actingAs($this->operator())->get('/admin/data')->assertForbidden();
         $this->actingAs($this->operator())->get('/admin/users')->assertForbidden();
         $this->actingAs($this->operator())->get('/admin/system')->assertForbidden();
@@ -50,6 +51,7 @@ class AdminTest extends TestCase
     {
         $this->actingAs($this->admin());
 
+        $this->get('/admin')->assertOk()->assertSee('Admin');
         $this->get('/admin/data')->assertOk();
         $this->get('/admin/data/matches')->assertOk();
         $this->get('/admin/data/match_events')->assertOk();

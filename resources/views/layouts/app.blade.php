@@ -14,9 +14,7 @@
         <a href="{{ route('settings') }}" @class(['active' => request()->routeIs('settings')])>Pengaturan</a>
         <a href="{{ route('history') }}" @class(['active' => request()->routeIs('history*')])>Riwayat</a>
         @if (auth()->user()->isAdmin())
-          <a href="{{ route('admin.data') }}" @class(['active' => request()->routeIs('admin.data*')])>Data</a>
-          <a href="{{ route('admin.users') }}" @class(['active' => request()->routeIs('admin.users*')])>Operator</a>
-          <a href="{{ route('admin.system') }}" @class(['active' => request()->routeIs('admin.system')])>Sistem</a>
+          <a href="{{ route('admin.dashboard') }}" @class(['active' => request()->routeIs('admin*')])>Admin</a>
         @endif
         <a href="{{ route('account.edit') }}" @class(['active' => request()->routeIs('account*')])>Akun</a>
       </span>

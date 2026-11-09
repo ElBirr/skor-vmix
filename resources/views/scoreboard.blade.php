@@ -303,7 +303,7 @@
         <a href="{{ route('history') }}" class="btn-link">Riwayat</a>
         <a href="{{ route('account.edit') }}" class="btn-link">Akun</a>
         @if (auth()->user()->isAdmin())
-          <a href="{{ route('admin.data') }}" class="btn-link">Data</a>
+          <a href="{{ route('admin.dashboard') }}" class="btn-link">Admin</a>
         @endif
         <a href="{{ route('settings') }}" class="btn-link">Pengaturan Tim</a>
         <form method="POST" action="{{ route('match.finish') }}" onsubmit="return confirm('Selesaikan pertandingan? Data akan masuk ke riwayat.')">@csrf<button type="submit" class="btn-link">Selesai Pertandingan</button></form>

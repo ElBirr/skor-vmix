@@ -7,6 +7,9 @@
     <h1>Operator</h1>
     <p class="subtitle">Akun baru otomatis berperan operator. Hanya admin yang bisa membuka halaman ini.</p>
   </div>
+  <div class="actions">
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary">&larr; Admin</a>
+  </div>
 </div>
 
 <div class="card">

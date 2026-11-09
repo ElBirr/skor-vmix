@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\BackupController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DataController;
 use App\Http\Controllers\Admin\SystemController;
 use App\Http\Controllers\Admin\UserController;
@@ -82,6 +83,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'destroy'])->name('logout');
 
     Route::middleware('admin')->group(function () {
+        Route::get('/admin', DashboardController::class)->name('admin.dashboard');
         Route::get('/admin/data', [DataController::class, 'index'])->name('admin.data');
         Route::get('/admin/data/{table}', [DataController::class, 'show'])->name('admin.data.show');
         Route::get('/admin/data/{table}/export', [DataController::class, 'export'])->name('admin.data.export');
