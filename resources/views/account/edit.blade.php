@@ -37,12 +37,12 @@
     <input type="password" name="current_password" required autocomplete="current-password" />
     <div class="row">
       <div>
-        <label>Kata Sandi Baru (min. 12 karakter)</label>
-        <input type="password" name="password" minlength="12" required autocomplete="new-password" />
+        <label>Kata Sandi Baru (min. 8 karakter)</label>
+        <input type="password" name="password" minlength="8" required autocomplete="new-password" />
       </div>
       <div>
         <label>Ulangi Kata Sandi Baru</label>
-        <input type="password" name="password_confirmation" minlength="12" required autocomplete="new-password" />
+        <input type="password" name="password_confirmation" minlength="8" required autocomplete="new-password" />
       </div>
     </div>
     <button type="submit" class="btn">Ganti Kata Sandi</button>

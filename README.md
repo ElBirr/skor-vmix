@@ -38,7 +38,7 @@ Papan skor lapangan untuk voli dan futsal, lengkap dengan overlay broadcast untu
 - Admin bisa menghapus pertandingan selesai dari halaman detail (ketik `HAPUS` untuk konfirmasi). Event audit pertandingan itu ikut terhapus.
 
 ### Akun - `/account`
-- Semua operator bisa mengubah nama dan nama pengguna, serta mengganti kata sandi (min. 12 karakter, wajib sandi lama).
+- Semua operator bisa mengubah nama dan nama pengguna, serta mengganti kata sandi (min. 8 karakter, wajib sandi lama).
 - Setelah ganti sandi, sesi login di perangkat lain diputus.
 
 ### Admin

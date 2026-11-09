@@ -28,12 +28,12 @@
     </div>
     <div class="row">
       <div>
-        <label>Kata Sandi Awal (min. 12 karakter)</label>
-        <input type="password" name="password" minlength="12" required autocomplete="new-password" />
+        <label>Kata Sandi Awal (min. 8 karakter)</label>
+        <input type="password" name="password" minlength="8" required autocomplete="new-password" />
       </div>
       <div>
         <label>Ulangi Kata Sandi</label>
-        <input type="password" name="password_confirmation" minlength="12" required autocomplete="new-password" />
+        <input type="password" name="password_confirmation" minlength="8" required autocomplete="new-password" />
       </div>
     </div>
     <button type="submit" class="btn">Tambah Operator</button>
@@ -86,8 +86,8 @@
                 <form method="POST" action="{{ route('admin.users.password', $user) }}" class="inline-form">
                   @csrf
                   @method('PUT')
-                  <input type="password" name="password" minlength="12" placeholder="Sandi baru" required autocomplete="new-password" />
-                  <input type="password" name="password_confirmation" minlength="12" placeholder="Ulangi sandi" required autocomplete="new-password" />
+                  <input type="password" name="password" minlength="8" placeholder="Sandi baru" required autocomplete="new-password" />
+                  <input type="password" name="password_confirmation" minlength="8" placeholder="Ulangi sandi" required autocomplete="new-password" />
                   <button type="submit" class="btn">Reset</button>
                 </form>
               </details>
