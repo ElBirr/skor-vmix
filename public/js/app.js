@@ -138,10 +138,15 @@
   }
 
   function render(model) {
-    els.overlay.hidden = false;
+    if (els.overlay.dataset.out !== "1") els.overlay.hidden = false;
     els.overlay.className = "overlay scene-" + scene + " sport-" + model.sport;
     document.documentElement.style.setProperty("--home-color", model.home.color);
     document.documentElement.style.setProperty("--away-color", model.away.color);
+
+    if (!els.overlay.dataset.entered) {
+      els.overlay.dataset.entered = "1";
+      playEnter();
+    }
 
     // Papan skor pojok kiri
     els.homeName.textContent = model.home.name;
@@ -219,6 +224,18 @@
     render(applyQueryOverrides(model));
   }
 
+  // Elemen scene aktif (papan skor atau layar mulai/selesai)
+  function sceneEl() {
+    return scene === "live" ? document.getElementById("scorebug") : els.intro;
+  }
+
+  function playEnter() {
+    var el = sceneEl();
+    el.classList.remove("is-leaving", "is-entering");
+    void el.offsetWidth; // paksa animasi bisa diulang
+    el.classList.add("is-entering");
+  }
+
   // Gabung partial tanpa menghapus objek home/away hasil merge
   function mergePartial(base, partial) {
     if (partial.home) base.home = Object.assign({}, base.home, partial.home);
@@ -264,6 +281,24 @@
   window.resetScoreboard = function () {
     window.scoreboardOverrides = null;
     poll();
+  };
+
+  // Animasi keluar/masuk manual, bisa dipanggil dari vMix (Execute JavaScript)
+  window.overlayOut = function () {
+    var el = sceneEl();
+    els.overlay.dataset.out = "1";
+    el.classList.remove("is-entering");
+    el.classList.add("is-leaving");
+    setTimeout(function () {
+      els.overlay.hidden = true;
+      el.classList.remove("is-leaving");
+    }, 360);
+  };
+
+  window.overlayIn = function () {
+    delete els.overlay.dataset.out;
+    els.overlay.hidden = false;
+    playEnter();
   };
 
   wireLogoFallback(els.liveLogo, null, function () {

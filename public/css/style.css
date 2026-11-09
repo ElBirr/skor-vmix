@@ -45,7 +45,14 @@ body {
   left: 67px;
   width: 391px;
   height: 81px;
-  animation: gtReveal 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.scorebug.is-entering {
+  animation: bugIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.scorebug.is-leaving {
+  animation: bugOut 0.35s cubic-bezier(0.55, 0, 1, 0.45) forwards;
 }
 
 .bug-logo {
@@ -164,7 +171,14 @@ body {
   flex-direction: column;
   align-items: center;
   width: 1046px;
-  animation: gtIntro 0.5s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.intro.is-entering {
+  animation: introIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.intro.is-leaving {
+  animation: introOut 0.35s cubic-bezier(0.55, 0, 1, 0.45) forwards;
 }
 
 .intro-headline {
@@ -290,25 +304,56 @@ body {
   display: none;
 }
 
-@keyframes gtReveal {
+@keyframes bugIn {
   from {
     opacity: 0;
-    transform: translate(-14px, 8px);
+    transform: translateX(-56px);
   }
   to {
     opacity: 1;
-    transform: translate(0, 0);
+    transform: translateX(0);
   }
 }
 
-@keyframes gtIntro {
+@keyframes bugOut {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-56px);
+  }
+}
+
+@keyframes introIn {
   from {
     opacity: 0;
-    transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(18px);
+    transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(40px);
   }
   to {
     opacity: 1;
     transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(0);
+  }
+}
+
+@keyframes introOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(var(--intro-scale)) translateY(40px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scorebug.is-entering,
+  .scorebug.is-leaving,
+  .intro.is-entering,
+  .intro.is-leaving {
+    animation: none;
   }
 }
 

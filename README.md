@@ -15,18 +15,19 @@ Papan skor lapangan untuk voli dan futsal, lengkap dengan overlay broadcast untu
 ### Pengaturan Pertandingan — `/settings`
 - Pilih cabang olahraga: Voli Beregu atau Futsal.
 - Nama tim Home/Away beserta sub (pelatih/pemain).
-- Warna tim Home/Away dan warna aksen overlay (format hex).
+- Warna tim Home/Away (format hex).
 - Period/babak (mis. `SET 1`, `1H`, `2H`), clock (mis. `12:45`), dan status (mis. `LIVE`).
 - Buat pertandingan baru dalam satu klik.
 
 ### Overlay vMix — `/overlay`
 - Halaman transparan siap dipakai sebagai Browser Input vMix (1920×1080).
-- `scene=live` (default): papan skor kecil di pojok kiri atas, tampil sepanjang pertandingan (nama tim, set dimenangkan, poin, dan penanda serve).
+- `scene=live` (default): papan skor kecil di pojok kiri atas, tampil sepanjang pertandingan (nama tim, set dimenangkan, dan poin).
 - `scene=start` atau `scene=end`: layar nama tim dan logo untuk mulai/selesai.
 - Logo tim opsional lewat query `logo` (logo event), `homeLogo` / `awayLogo` (logo tim), atau isi URL logo di halaman pengaturan. Jika kosong dipakai ikon olahraga / inisial tim.
 - Override tampilan lewat query string tanpa mengubah data pertandingan:
   `scene`, `sport`, `logo`, `home`, `away`, `homeScore`, `awayScore`, `homeColor`, `awayColor`, `homeLogo`, `awayLogo`, `period`, `clock`/`time`, `status`.
 - Kontrol via JavaScript dari vMix: `window.updateScoreboard({ home: { score: 10 } })`; panggil `window.resetScoreboard()` untuk kembali mengikuti data server.
+- Animasi masuk otomatis saat overlay pertama tampil. Untuk animasi keluar, panggil `window.overlayOut()` dari vMix (shortcut Browser Input → Execute JavaScript), lalu `window.overlayIn()` untuk menampilkannya lagi tanpa reload.
 - Polling otomatis ke API tiap 1 detik.
 
 ### API
