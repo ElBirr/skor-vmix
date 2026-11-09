@@ -29,6 +29,9 @@ class MatchController extends Controller
             ...$match->toOverlayArray(),
             'timeout' => $match->is_finished ? null : $match->activeTimeout(),
             'overlay' => OverlayController::state(),
+            // Statistik hanya untuk scene hasil akhir supaya polling live tetap ringan.
+            'stats' => $request->boolean('latest') && $match->sport === 'volley' ? $match->matchStats() : null,
+            'durationMinutes' => $request->boolean('latest') ? $match->durationMinutes() : null,
         ]);
     }
 
@@ -75,7 +78,10 @@ class MatchController extends Controller
             $this->audit($match, $request, $before, $match->toOverlayArray(), 'match_finished');
         }, 3);
 
-        return redirect()->route('settings')->with('status', 'Pertandingan disimpan ke riwayat. Siapkan pertandingan berikutnya.');
+        // Semua grafis langsung ditutup; operator memunculkan Hasil Akhir sendiri saat siap.
+        OverlayController::hideAll();
+
+        return redirect()->route('settings')->with('status', 'Pertandingan disimpan ke riwayat. Semua overlay ditutup, tampilkan Hasil Akhir dari Kontrol vMix bila siap.');
     }
 
     public function destroy(Request $request, Pertandingan $match)
@@ -175,6 +181,11 @@ class MatchController extends Controller
         return $this->change($request, 'serve_changed', function (Pertandingan $match) use ($data): void {
             $match->serving = $data['serving'];
         });
+    }
+
+    public function swapSides(Request $request)
+    {
+        return $this->change($request, 'sides_swapped', fn (Pertandingan $match) => $match->swapSides());
     }
 
     public function adjustTimeout(Request $request)
@@ -284,6 +295,7 @@ class MatchController extends Controller
             'clock' => 'nullable|string|max:10',
             'status' => 'nullable|string|max:20',
             'headline' => 'nullable|string|max:40',
+            'round' => 'nullable|string|max:40',
             'venue' => 'nullable|string|max:60',
             'match_date' => 'nullable|date',
             'home_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],

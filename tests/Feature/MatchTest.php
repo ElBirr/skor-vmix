@@ -134,12 +134,14 @@ class MatchTest extends TestCase
         $this->post('/match', [
             ...$match->only(['sport', 'period', 'home_name', 'away_name', 'home_color', 'away_color']),
             'headline' => 'PORPROV 2026',
+            'round' => 'SEMIFINAL',
             'venue' => 'GOR Satria',
             'match_date' => '2026-11-09',
         ])->assertRedirect();
 
         $this->getJson('/api/match')
             ->assertJsonPath('headline', 'PORPROV 2026')
+            ->assertJsonPath('round', 'SEMIFINAL')
             ->assertJsonPath('venue', 'GOR Satria')
             ->assertJsonPath('date', '2026-11-09');
     }
@@ -150,6 +152,76 @@ class MatchTest extends TestCase
             ->call('POST', '/match', [], [], [], ['CONTENT_LENGTH' => 50 * 1024 * 1024])
             ->assertStatus(413)
             ->assertSee('Upload terlalu besar');
+    }
+
+    public function test_end_scene_api_reports_totals_and_longest_run(): void
+    {
+        $this->createMatch();
+
+        foreach (['home', 'home', 'home', 'away', 'home', 'away', 'away'] as $side) {
+            $this->postJson('/match/score', ['side' => $side, 'delta' => 1])->assertOk();
+        }
+        // Koreksi poin away terakhir: run away jadi 1.
+        $this->postJson('/match/score', ['side' => 'away', 'delta' => -1, 'reason' => 'Salah tekan'])->assertOk();
+
+        $this->getJson('/api/match?latest=1')
+            ->assertJsonPath('stats.totals.home', 4)
+            ->assertJsonPath('stats.totals.away', 2)
+            ->assertJsonPath('stats.longestRun.home', 3)
+            ->assertJsonPath('stats.longestRun.away', 1);
+
+        $this->getJson('/api/match')->assertJsonPath('stats', null);
+    }
+
+    public function test_control_page_requires_login_and_renders(): void
+    {
+        $this->get('/control')->assertRedirect('/login');
+
+        $this->actingAs(User::factory()->create())
+            ->get('/control')
+            ->assertOk()
+            ->assertSee('Kontrol vMix');
+    }
+
+    public function test_swap_sides_exchanges_all_team_data(): void
+    {
+        $this->createMatch();
+
+        foreach (range(1, 25) as $i) {
+            $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
+        }
+        $this->postJson('/match/score', ['side' => 'away', 'delta' => 1])->assertOk();
+        $this->postJson('/match/timeout', ['side' => 'away', 'delta' => 1])->assertOk();
+
+        $this->postJson('/match/swap')
+            ->assertOk()
+            ->assertJsonPath('home.name', 'TIM B')
+            ->assertJsonPath('away.name', 'TIM A')
+            ->assertJsonPath('home.color', '#2563eb')
+            ->assertJsonPath('home.score', 1)
+            ->assertJsonPath('home.timeouts', 1)
+            ->assertJsonPath('serving', 'home')
+            ->assertJsonPath('sets.0.home', 0)
+            ->assertJsonPath('sets.0.away', 25)
+            ->assertJsonPath('away.setsWon', 1);
+
+        // Timeout yang sedang berjalan ikut pindah sisi.
+        $this->getJson('/api/match')->assertJsonPath('timeout.side', 'home');
+
+        // Poin beruntun 25 milik TIM A kini tercatat di sisi away.
+        $this->getJson('/api/match?latest=1')->assertJsonPath('stats.longestRun.away', 25);
+    }
+
+    public function test_end_scene_reports_match_duration(): void
+    {
+        $this->createMatch();
+
+        $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
+        $this->travel(83)->minutes();
+        $this->postJson('/match/score', ['side' => 'away', 'delta' => 1])->assertOk();
+
+        $this->getJson('/api/match?latest=1')->assertJsonPath('durationMinutes', 83);
+        $this->getJson('/api/match')->assertJsonPath('durationMinutes', null);
     }
 
     public function test_volleyball_set_requires_a_two_point_lead(): void
