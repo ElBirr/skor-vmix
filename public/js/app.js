@@ -173,7 +173,7 @@
     }
 
     if (data.home) {
-      model.home.name = sanitizeText(data.home.name, model.home.name, 24);
+      model.home.name = sanitizeText(data.home.name, model.home.name, 50);
       model.home.logo = sanitizeLogo(data.home.logo);
       model.home.score = clampInt(data.home.score, 0, 999, 0);
       model.home.color = sanitizeHex(data.home.color, model.home.color);
@@ -181,7 +181,7 @@
       model.home.timeouts = clampInt(data.home.timeouts, 0, 2, 0);
     }
     if (data.away) {
-      model.away.name = sanitizeText(data.away.name, model.away.name, 24);
+      model.away.name = sanitizeText(data.away.name, model.away.name, 50);
       model.away.logo = sanitizeLogo(data.away.logo);
       model.away.score = clampInt(data.away.score, 0, 999, 0);
       model.away.color = sanitizeHex(data.away.color, model.away.color);
@@ -198,8 +198,8 @@
       if (VALID_SPORTS.indexOf(sport) !== -1) model.sport = sport;
     }
     if (params.has("logo")) model.logo = sanitizeLogo(params.get("logo"));
-    if (params.has("home")) model.home.name = sanitizeText(params.get("home"), model.home.name, 24);
-    if (params.has("away")) model.away.name = sanitizeText(params.get("away"), model.away.name, 24);
+    if (params.has("home")) model.home.name = sanitizeText(params.get("home"), model.home.name, 50);
+    if (params.has("away")) model.away.name = sanitizeText(params.get("away"), model.away.name, 50);
     if (params.has("homeLogo")) model.home.logo = sanitizeLogo(params.get("homeLogo"));
     if (params.has("awayLogo")) model.away.logo = sanitizeLogo(params.get("awayLogo"));
     if (params.has("homeScore")) model.home.score = clampInt(params.get("homeScore"), 0, 999, 0);
@@ -244,11 +244,45 @@
     els.introDesc.textContent = introDescription(model);
     renderWinner(model);
     renderEventHeader(model);
-    els.introHomeName.textContent = model.home.name;
-    els.introAwayName.textContent = model.away.name;
+    setFittedText(els.introHomeName, model.home.name);
+    setFittedText(els.introAwayName, model.away.name);
     renderTeamLogo(els.introHomeLogo, els.introHomeFallback, model.home);
     renderTeamLogo(els.introAwayLogo, els.introAwayFallback, model.away);
     renderSetHistory(model);
+  }
+
+  // Nama tim panjang: kecilkan huruf sampai muat, lalu pecah 2 baris bila perlu.
+  var NAME_MAX_PX = 56;
+  var NAME_MIN_PX = 30;
+
+  function setFittedText(el, text) {
+    if (el.dataset.fitted === text) return;
+    el.textContent = text;
+    fitText(el);
+  }
+
+  function fitText(el) {
+    // Scene tersembunyi belum bisa diukur; ulangi di render berikutnya.
+    if (el.clientWidth === 0) {
+      delete el.dataset.fitted;
+      return;
+    }
+    el.classList.remove("is-wrapped");
+    var size = NAME_MAX_PX;
+    el.style.fontSize = size + "px";
+    while (el.scrollWidth > el.clientWidth && size > NAME_MIN_PX) {
+      size -= 2;
+      el.style.fontSize = size + "px";
+    }
+    if (el.scrollWidth > el.clientWidth) el.classList.add("is-wrapped");
+    el.dataset.fitted = el.textContent;
+  }
+
+  // Ukur ulang setelah font selesai dimuat, karena lebar huruf bisa berubah.
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () {
+      [els.introHomeName, els.introAwayName].forEach(fitText);
+    });
   }
 
   // Ulang animasi kelas tertentu pada elemen.

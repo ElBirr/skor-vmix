@@ -288,8 +288,15 @@ body {
   text-align: center;
   text-transform: uppercase;
   white-space: nowrap;
+  max-width: 100%;
   overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+/* Masih kepanjangan di ukuran minimum: tampil 2 baris */
+.intro-team-name.is-wrapped {
+  white-space: normal;
+  line-height: 1.05;
+  overflow-wrap: anywhere;
 }
 
 /* Riwayat skor per set di scene selesai */
@@ -335,14 +342,12 @@ body {
 }
 
 .intro-set-table td.is-name {
-  max-width: 340px;
+  max-width: 380px;
   border-left: 10px solid var(--row-color);
-  font-size: 24px;
+  font-size: 22px;
+  line-height: 1.1;
   text-align: left;
   text-transform: uppercase;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   opacity: 1;
 }
 
