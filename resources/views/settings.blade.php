@@ -159,6 +159,7 @@
     </div>
     @endif
   </div>
+  <script src="{{ asset('js/image-resize.js') }}"></script>
   <script>
     // Color picker dan kotak hex saling sinkron.
     document.querySelectorAll('[data-color-for]').forEach(picker => {
