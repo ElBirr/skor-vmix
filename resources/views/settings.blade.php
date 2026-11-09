@@ -86,8 +86,11 @@
               <img src="{{ $match->home_logo }}" alt="Logo Home" style="display:block;height:48px;margin-bottom:6px;" />
             @endif
             <input type="file" name="home_logo" accept="image/*" />
-            <label>Warna Home (hex)</label>
-            <input type="text" name="home_color" value="{{ $match->home_color }}" maxlength="7" />
+            <label>Warna Home</label>
+            <div class="color-field">
+              <input type="color" value="{{ $match->home_color }}" data-color-for="home_color" aria-label="Pilih warna" />
+              <input type="text" name="home_color" value="{{ $match->home_color }}" maxlength="7" pattern="#[0-9A-Fa-f]{6}" />
+            </div>
           </div>
           <div>
             <label>Nama Tim Away</label>
@@ -99,23 +102,42 @@
               <img src="{{ $match->away_logo }}" alt="Logo Away" style="display:block;height:48px;margin-bottom:6px;" />
             @endif
             <input type="file" name="away_logo" accept="image/*" />
-            <label>Warna Away (hex)</label>
-            <input type="text" name="away_color" value="{{ $match->away_color }}" maxlength="7" />
+            <label>Warna Away</label>
+            <div class="color-field">
+              <input type="color" value="{{ $match->away_color }}" data-color-for="away_color" aria-label="Pilih warna" />
+              <input type="text" name="away_color" value="{{ $match->away_color }}" maxlength="7" pattern="#[0-9A-Fa-f]{6}" />
+            </div>
           </div>
         </div>
       </div>
 
       <div class="card">
         <h2>Opsi Tampilan</h2>
+        <div class="row">
+          <div>
+            <label>Venue / Lokasi (tampil di Opening)</label>
+            <input type="text" name="venue" value="{{ old('venue', $match->venue) }}" maxlength="60" placeholder="GOR Satria" />
+          </div>
+          <div>
+            <label>Tanggal Pertandingan</label>
+            <input type="date" name="match_date" value="{{ old('match_date', $match->match_date?->toDateString()) }}" />
+          </div>
+        </div>
         <label>Logo Event / Turnamen (upload)</label>
         @if ($match->logo)
           <img src="{{ $match->logo }}" alt="Logo Event" style="display:block;height:48px;margin-bottom:6px;" />
         @endif
         <input type="file" name="logo" accept="image/*" />
-        <label>Warna Utama Overlay (hex)</label>
-        <input type="text" name="theme_primary" value="{{ $match->theme_primary ?? '#001c54' }}" maxlength="7" placeholder="#001c54" />
-        <label>Warna Aksen Overlay (hex)</label>
-        <input type="text" name="theme_accent" value="{{ $match->theme_accent ?? '#c00000' }}" maxlength="7" placeholder="#c00000" />
+        <label>Warna Utama Overlay</label>
+        <div class="color-field">
+              <input type="color" value="{{ $match->theme_primary ?? '#001c54' }}" data-color-for="theme_primary" aria-label="Pilih warna" />
+              <input type="text" name="theme_primary" value="{{ $match->theme_primary ?? '#001c54' }}" maxlength="7" pattern="#[0-9A-Fa-f]{6}" placeholder="#001c54" />
+            </div>
+        <label>Warna Aksen Overlay</label>
+        <div class="color-field">
+              <input type="color" value="{{ $match->theme_accent ?? '#c00000' }}" data-color-for="theme_accent" aria-label="Pilih warna" />
+              <input type="text" name="theme_accent" value="{{ $match->theme_accent ?? '#c00000' }}" maxlength="7" pattern="#[0-9A-Fa-f]{6}" placeholder="#c00000" />
+            </div>
       </div>
 
       <button type="submit" class="btn">{{ $isNewMatch ? 'Mulai Pertandingan' : 'Simpan Pengaturan' }}</button>
@@ -135,5 +157,17 @@
     </div>
     @endif
   </div>
+  <script>
+    // Color picker dan kotak hex saling sinkron.
+    document.querySelectorAll('[data-color-for]').forEach(picker => {
+      const text = document.querySelector('input[name="' + picker.dataset.colorFor + '"]');
+      picker.addEventListener('input', () => { text.value = picker.value; });
+      text.addEventListener('input', () => {
+        const value = text.value.trim();
+        const hex = value.startsWith('#') ? value : '#' + value;
+        if (/^#[0-9A-Fa-f]{6}$/.test(hex)) picker.value = hex.toLowerCase();
+      });
+    });
+  </script>
 </body>
 </html>

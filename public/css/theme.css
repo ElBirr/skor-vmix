@@ -534,3 +534,25 @@ input::placeholder {
     width: 100%;
   }
 }
+
+/* Color picker + kotak hex di pengaturan */
+.color-field {
+  display: flex;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.color-field input[type="color"] {
+  flex: 0 0 52px;
+  width: 52px;
+  min-height: 40px;
+  padding: 2px;
+  cursor: pointer;
+}
+
+.color-field input[type="text"] {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  text-transform: lowercase;
+}

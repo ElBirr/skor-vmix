@@ -18,8 +18,6 @@
 
   var els = {
     overlay: document.getElementById("overlay"),
-    bugLogo: document.getElementById("bugLogo"),
-    liveLogo: document.getElementById("liveLogo"),
     homeName: document.getElementById("homeName"),
     awayName: document.getElementById("awayName"),
     homeScore: document.getElementById("homeScore"),
@@ -38,13 +36,17 @@
     introHomeFallback: document.getElementById("introHomeFallback"),
     introAwayFallback: document.getElementById("introAwayFallback"),
     introSets: document.getElementById("introSets"),
+    introEventLogo: document.getElementById("introEventLogo"),
+    introEventLogoImg: document.getElementById("introEventLogoImg"),
+    introVenue: document.getElementById("introVenue"),
+    confetti: document.getElementById("confetti"),
+    introHomeLogoBox: document.querySelector(".intro-logo-home"),
+    introAwayLogoBox: document.querySelector(".intro-logo-away"),
     introVs: document.querySelector(".intro-vs"),
     introHomeTeam: document.getElementById("introHomeTeam"),
     introAwayTeam: document.getElementById("introAwayTeam"),
     homeServe: document.getElementById("homeServe"),
     awayServe: document.getElementById("awayServe"),
-    homeTimeouts: document.getElementById("homeTimeouts"),
-    awayTimeouts: document.getElementById("awayTimeouts"),
     bugTag: document.getElementById("bugTag"),
     bugTagColor: document.getElementById("bugTagColor"),
     bugTagLabel: document.getElementById("bugTagLabel"),
@@ -55,6 +57,7 @@
 
   var VALID_SIDES = ["home", "away"];
   var lastScores = { home: null, away: null };
+  var lastSetsWon = { home: null, away: null };
   // Label SERVIS hanya tampil sebentar setiap kali servis berpindah.
   var SERVE_TAG_MS = 8000;
   var serveTag = { side: "", until: 0 };
@@ -64,6 +67,8 @@
   // Kontrol dari halaman operator; hanya bereaksi saat nilainya berubah
   // supaya overlayIn()/overlayOut() dari vMix tetap bisa dipakai.
   var remote = { visible: null, serveCue: null };
+  var confettiPlayed = false;
+  var MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
 
   function clampInt(value, min, max, fallback) {
     var n = parseInt(value, 10);
@@ -116,6 +121,9 @@
       period: "SET 1",
       clock: "",
       status: "",
+      currentSet: 1,
+      venue: "",
+      date: "",
       sets: [],
       serving: "",
       timeout: null,
@@ -134,6 +142,9 @@
     model.period = sanitizeText(data.period, model.period, 20);
     model.clock = sanitizeText(data.clock, "", 10);
     model.status = sanitizeText(data.status, "", 20);
+    model.currentSet = clampInt(data.currentSet, 1, 5, 1);
+    model.venue = sanitizeText(data.venue, "", 60);
+    model.date = /^\d{4}-\d{2}-\d{2}$/.test(data.date || "") ? data.date : "";
 
     if (Array.isArray(data.sets)) {
       model.sets = data.sets.slice(0, 5).map(function (set) {
@@ -222,16 +233,15 @@
     setScore(els.homeScore, "home", model.home.score);
     setScore(els.awayScore, "away", model.away.score);
     renderServe(model);
-    renderTimeouts(model);
     renderTag(model);
-    els.homeSetsWon.textContent = model.sport === "volley" ? model.home.setsWon : "";
-    els.awaySetsWon.textContent = model.sport === "volley" ? model.away.setsWon : "";
-    renderEventLogo(model.logo);
+    setSetsWon(els.homeSetsWon, "home", model.sport === "volley" ? model.home.setsWon : "");
+    setSetsWon(els.awaySetsWon, "away", model.sport === "volley" ? model.away.setsWon : "");
 
     // Scene mulai/selesai
     els.introSport.textContent = model.sport === "futsal" ? "FUTSAL" : "VOLI";
     els.introDesc.textContent = introDescription(model);
     renderWinner(model);
+    renderEventHeader(model);
     els.introHomeName.textContent = model.home.name;
     els.introAwayName.textContent = model.away.name;
     renderTeamLogo(els.introHomeLogo, els.introHomeFallback, model.home);
@@ -252,6 +262,14 @@
     if (changed && els.overlay.dataset.ready) replay(el, "is-bumped");
     lastScores[side] = score;
     el.textContent = score;
+  }
+
+  // Jumlah set berubah: kotak set berkilat.
+  function setSetsWon(el, side, value) {
+    var changed = lastSetsWon[side] !== null && lastSetsWon[side] !== value;
+    if (changed && value !== "" && els.overlay.dataset.ready) replay(el, "is-bumped");
+    lastSetsWon[side] = value;
+    el.textContent = value;
   }
 
   function renderServe(model) {
@@ -343,17 +361,6 @@
     els.bugTagProgress.style.transform = "scaleX(" + (content.progress || 0) + ")";
   }
 
-  // Titik sisa jatah timeout (voli: 2 per set).
-  function renderTimeouts(model) {
-    ["home", "away"].forEach(function (side) {
-      var dots = els[side + "Timeouts"];
-      dots.hidden = model.sport !== "volley";
-      Array.prototype.forEach.call(dots.children, function (dot, i) {
-        dot.classList.toggle("is-used", i < model[side].timeouts);
-      });
-    });
-  }
-
   // Warna tema dari pengaturan (warna utama dan aksen).
   function applyTheme(theme) {
     var root = document.documentElement.style;
@@ -388,6 +395,50 @@
     }
     els.introHomeTeam.classList.toggle("is-winner", winner === "home");
     els.introAwayTeam.classList.toggle("is-winner", winner === "away");
+    els.introHomeLogoBox.classList.toggle("is-winner", winner === "home");
+    els.introAwayLogoBox.classList.toggle("is-winner", winner === "away");
+    els.introHomeLogoBox.classList.toggle("is-loser", winner === "away");
+    els.introAwayLogoBox.classList.toggle("is-loser", winner === "home");
+
+    if (winner && !confettiPlayed) {
+      confettiPlayed = true;
+      launchConfetti(model[winner].color);
+    }
+  }
+
+  // Hujan konfeti warna tim pemenang, sekali setiap scene selesai masuk.
+  function launchConfetti(color) {
+    var colors = [color, color, "#ffd400", "#ffffff"];
+    els.confetti.replaceChildren();
+    for (var i = 0; i < 90; i++) {
+      var piece = document.createElement("i");
+      piece.style.left = (Math.random() * 100).toFixed(1) + "%";
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDelay = (1.2 + Math.random() * 1.5).toFixed(2) + "s";
+      piece.style.animationDuration = (2.6 + Math.random() * 1.8).toFixed(2) + "s";
+      piece.style.setProperty("--drift", (Math.random() * 240 - 120).toFixed(0) + "px");
+      piece.style.setProperty("--spin", (Math.random() * 1080 - 540).toFixed(0) + "deg");
+      els.confetti.appendChild(piece);
+    }
+    setTimeout(function () {
+      els.confetti.replaceChildren();
+    }, 6000);
+  }
+
+  // Logo event di atas headline, venue & tanggal di bawah strip (scene mulai).
+  function renderEventHeader(model) {
+    var logo = els.introEventLogoImg.dataset.failed === model.logo ? "" : model.logo;
+    els.introEventLogo.hidden = !logo;
+    if (logo && els.introEventLogoImg.getAttribute("src") !== logo) els.introEventLogoImg.src = logo;
+
+    var parts = [];
+    if (model.venue) parts.push(model.venue);
+    if (model.date) {
+      var d = model.date.split("-");
+      parts.push(parseInt(d[2], 10) + " " + MONTHS[parseInt(d[1], 10) - 1] + " " + d[0]);
+    }
+    els.introVenue.textContent = parts.join(" • ");
+    els.introVenue.hidden = scene !== "start" || parts.length === 0;
   }
 
   // Riwayat skor per set, hanya di scene selesai.
@@ -399,26 +450,42 @@
       return;
     }
 
-    var key = JSON.stringify(model.sets);
+    var key = JSON.stringify([model.sets, model.home.name, model.away.name, model.home.color, model.away.color]);
     if (els.introSets.dataset.key === key) return;
     els.introSets.dataset.key = key;
 
-    els.introSets.replaceChildren();
-    model.sets.forEach(function (set, index) {
-      var chip = document.createElement("span");
-      chip.className = "intro-set";
-      chip.style.setProperty("--i", index);
-
-      var label = document.createElement("b");
-      label.textContent = "Set " + (index + 1);
-      chip.appendChild(label);
-
-      var score = document.createElement("span");
-      score.textContent = set.home + " - " + set.away;
-      chip.appendChild(score);
-
-      els.introSets.appendChild(chip);
+    // Tabel skor per set: baris home & away, kolom tiap set + total set.
+    var table = document.createElement("table");
+    table.className = "intro-set-table";
+    var head = table.insertRow();
+    head.className = "intro-set-head";
+    ["TIM"].concat(model.sets.map(function (_, i) { return "SET " + (i + 1); }), ["SET"]).forEach(function (text, i, all) {
+      var th = document.createElement("th");
+      th.textContent = text;
+      if (i === all.length - 1) th.className = "is-total";
+      head.appendChild(th);
     });
+
+    ["home", "away"].forEach(function (side, row) {
+      var other = side === "home" ? "away" : "home";
+      var tr = table.insertRow();
+      tr.style.setProperty("--i", row + 1);
+      if (model[side].setsWon > model[other].setsWon) tr.className = "is-winner-row";
+      tr.style.setProperty("--row-color", model[side].color);
+      var name = tr.insertCell();
+      name.className = "is-name";
+      name.textContent = model[side].name;
+      model.sets.forEach(function (set) {
+        var td = tr.insertCell();
+        td.textContent = set[side];
+        if (set[side] > set[other]) td.className = "is-won";
+      });
+      var total = tr.insertCell();
+      total.className = "is-total";
+      total.textContent = model[side].setsWon;
+    });
+
+    els.introSets.replaceChildren(table);
     els.introSets.hidden = false;
   }
 
@@ -435,21 +502,18 @@
       return parts.join(" • ");
     }
 
+    // Voli: set berjalan dan skor set diisi otomatis dari data pertandingan.
+    if (model.sport === "volley") {
+      parts.push("SET " + model.currentSet);
+      if (model.home.setsWon || model.away.setsWon) {
+        parts.push(model.home.setsWon + " - " + model.away.setsWon);
+      }
+      return parts.join(" • ");
+    }
+
     if (model.period) parts.push(model.period);
     if (model.clock) parts.push(model.clock);
     return parts.join(" • ");
-  }
-
-  function renderEventLogo(url) {
-    if (!url || els.liveLogo.dataset.failed === url) {
-      els.liveLogo.hidden = true;
-      els.liveLogo.removeAttribute("src");
-      els.bugLogo.classList.remove("has-logo");
-      return;
-    }
-    if (els.liveLogo.getAttribute("src") !== url) els.liveLogo.src = url;
-    els.liveLogo.hidden = false;
-    els.bugLogo.classList.add("has-logo");
   }
 
   function renderTeamLogo(img, fallback, team) {
@@ -490,6 +554,7 @@
     el.classList.remove("is-leaving", "is-entering");
     void el.offsetWidth; // paksa animasi bisa diulang
     el.classList.add("is-entering");
+    confettiPlayed = false;
   }
 
   // Gabung partial tanpa menghapus objek home/away hasil merge
@@ -580,9 +645,9 @@
     playEnter();
   };
 
-  wireLogoFallback(els.liveLogo, null, function () {
-    els.liveLogo.hidden = true;
-    els.bugLogo.classList.remove("has-logo");
+  els.introEventLogoImg.addEventListener("error", function () {
+    els.introEventLogoImg.dataset.failed = els.introEventLogoImg.getAttribute("src") || "";
+    els.introEventLogo.hidden = true;
   });
   wireLogoFallback(els.introHomeLogo, els.introHomeFallback);
   wireLogoFallback(els.introAwayLogo, els.introAwayFallback);
