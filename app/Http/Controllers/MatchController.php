@@ -56,6 +56,16 @@ class MatchController extends Controller
             $match->is_finished = true;
             $match->is_active = false;
             $match->status = 'SELESAI';
+
+            // Set yang belum tuntas tetap dicatat supaya riwayat skor di scene selesai lengkap.
+            $sets = $match->set_scores ?? [];
+            if ($match->sport === 'volley'
+                && ($match->home_score > 0 || $match->away_score > 0)
+                && $match->current_set > count($sets)) {
+                $sets[] = ['home' => $match->home_score, 'away' => $match->away_score];
+                $match->set_scores = $sets;
+            }
+
             $match->save();
 
             $this->audit($match, $request, $before, $match->toOverlayArray(), 'match_finished');

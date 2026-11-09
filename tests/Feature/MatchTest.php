@@ -266,7 +266,33 @@ class MatchTest extends TestCase
         $this->get('/overlay')
             ->assertOk()
             ->assertSee('id="scorebug"', false)
-            ->assertSee('id="intro"', false);
+            ->assertSee('id="intro"', false)
+            ->assertSee('id="introSets"', false);
+    }
+
+    public function test_finishing_records_the_current_set_for_the_end_scene(): void
+    {
+        $this->createMatch();
+        $match = Pertandingan::active()->first();
+        $match->update([
+            'set_scores' => [['home' => 25, 'away' => 20]],
+            'current_set' => 2,
+            'home_score' => 12,
+            'away_score' => 10,
+        ]);
+
+        $this->post('/match/finish')->assertRedirect('/settings');
+
+        $this->assertSame(
+            [['home' => 25, 'away' => 20], ['home' => 12, 'away' => 10]],
+            $match->fresh()->set_scores
+        );
+
+        $this->getJson('/api/match?latest=1')
+            ->assertOk()
+            ->assertJsonPath('sets.0.home', 25)
+            ->assertJsonPath('sets.1.home', 12)
+            ->assertJsonPath('sets.1.away', 10);
     }
 
     public function test_end_scene_falls_back_to_the_latest_finished_match(): void

@@ -287,6 +287,39 @@ body {
   text-overflow: ellipsis;
 }
 
+/* Riwayat skor per set di scene selesai */
+.intro-sets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 865px;
+  margin-top: 18px;
+}
+
+.intro-set {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 14px;
+  background: var(--gt-navy-90);
+  border: 2px solid var(--gt-white);
+  color: var(--gt-white);
+  font-size: 26px;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.intro-set b {
+  color: var(--gt-silver);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 /* Ikon olahraga hanya sebagai logo cadangan */
 .logo-futsal,
 .sport-futsal .logo-volley {

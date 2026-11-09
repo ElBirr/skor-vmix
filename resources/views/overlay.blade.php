@@ -75,6 +75,7 @@
           <span class="intro-team-name" id="introAwayName">AWAY</span>
         </div>
       </div>
+      <div class="intro-sets" id="introSets" hidden></div>
     </div>
   </div>
 

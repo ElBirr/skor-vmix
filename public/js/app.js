@@ -33,7 +33,8 @@
     introHomeLogo: document.getElementById("introHomeLogo"),
     introAwayLogo: document.getElementById("introAwayLogo"),
     introHomeFallback: document.getElementById("introHomeFallback"),
-    introAwayFallback: document.getElementById("introAwayFallback")
+    introAwayFallback: document.getElementById("introAwayFallback"),
+    introSets: document.getElementById("introSets")
   };
 
   function clampInt(value, min, max, fallback) {
@@ -84,7 +85,8 @@
       },
       period: "SET 1",
       clock: "",
-      status: ""
+      status: "",
+      sets: []
     };
   }
 
@@ -98,6 +100,15 @@
     model.period = sanitizeText(data.period, model.period, 20);
     model.clock = sanitizeText(data.clock, "", 10);
     model.status = sanitizeText(data.status, "", 20);
+
+    if (Array.isArray(data.sets)) {
+      model.sets = data.sets.slice(0, 5).map(function (set) {
+        return {
+          home: clampInt(set.home, 0, 999, 0),
+          away: clampInt(set.away, 0, 999, 0)
+        };
+      });
+    }
 
     if (data.home) {
       model.home.name = sanitizeText(data.home.name, model.home.name, 24);
@@ -165,6 +176,33 @@
     els.introAwayName.textContent = model.away.name;
     renderTeamLogo(els.introHomeLogo, els.introHomeFallback, model.home);
     renderTeamLogo(els.introAwayLogo, els.introAwayFallback, model.away);
+    renderSetHistory(model);
+  }
+
+  // Riwayat skor per set, hanya di scene selesai.
+  function renderSetHistory(model) {
+    if (scene !== "end" || model.sets.length === 0) {
+      els.introSets.hidden = true;
+      els.introSets.replaceChildren();
+      return;
+    }
+
+    els.introSets.replaceChildren();
+    model.sets.forEach(function (set, index) {
+      var chip = document.createElement("span");
+      chip.className = "intro-set";
+
+      var label = document.createElement("b");
+      label.textContent = "Set " + (index + 1);
+      chip.appendChild(label);
+
+      var score = document.createElement("span");
+      score.textContent = set.home + " - " + set.away;
+      chip.appendChild(score);
+
+      els.introSets.appendChild(chip);
+    });
+    els.introSets.hidden = false;
   }
 
   function introDescription(model) {
