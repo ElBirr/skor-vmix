@@ -108,6 +108,24 @@ class MatchTest extends TestCase
         $this->getJson('/api/match')->assertJsonPath('timeout', null);
     }
 
+    public function test_theme_colors_are_saved_and_carried_to_next_match(): void
+    {
+        $this->createMatch();
+
+        $match = Pertandingan::active()->first();
+        $this->post('/match', [
+            ...$match->only(['sport', 'period', 'home_name', 'away_name', 'home_color', 'away_color']),
+            'theme_primary' => '#112233',
+            'theme_accent' => '#ff8800',
+        ])->assertRedirect();
+
+        $this->getJson('/api/match')
+            ->assertJsonPath('theme.primary', '#112233')
+            ->assertJsonPath('theme.accent', '#ff8800');
+
+        $this->assertSame('#ff8800', Pertandingan::newMatch()->theme_accent);
+    }
+
     public function test_volleyball_set_requires_a_two_point_lead(): void
     {
         $this->createMatch();

@@ -36,6 +36,7 @@
           <span class="bug-name">
             <span class="bug-color" id="homeColor"></span>
             <span class="bug-team" id="homeName">HOME</span>
+            <span class="bug-timeouts" id="homeTimeouts"><i></i><i></i></span>
             <span class="bug-serve" id="homeServe" hidden></span>
           </span>
           <span class="bug-sets" id="homeSetsWon">0</span>
@@ -45,6 +46,7 @@
           <span class="bug-name">
             <span class="bug-color" id="awayColor"></span>
             <span class="bug-team" id="awayName">AWAY</span>
+            <span class="bug-timeouts" id="awayTimeouts"><i></i><i></i></span>
             <span class="bug-serve" id="awayServe" hidden></span>
           </span>
           <span class="bug-sets" id="awaySetsWon">0</span>
@@ -82,11 +84,9 @@
       </div>
       <div class="intro-teams">
         <div class="intro-team intro-team-home" id="introHomeTeam">
-          <span class="intro-winner">PEMENANG</span>
           <span class="intro-team-name" id="introHomeName">HOME</span>
         </div>
         <div class="intro-team intro-team-away" id="introAwayTeam">
-          <span class="intro-winner">PEMENANG</span>
           <span class="intro-team-name" id="introAwayName">AWAY</span>
         </div>
       </div>

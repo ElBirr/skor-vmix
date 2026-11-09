@@ -40,6 +40,8 @@
     introAwayTeam: document.getElementById("introAwayTeam"),
     homeServe: document.getElementById("homeServe"),
     awayServe: document.getElementById("awayServe"),
+    homeTimeouts: document.getElementById("homeTimeouts"),
+    awayTimeouts: document.getElementById("awayTimeouts"),
     bugTag: document.getElementById("bugTag"),
     bugTagColor: document.getElementById("bugTagColor"),
     bugTagLabel: document.getElementById("bugTagLabel"),
@@ -50,6 +52,12 @@
 
   var VALID_SIDES = ["home", "away"];
   var lastScores = { home: null, away: null };
+  // Label SERVIS hanya tampil sebentar setiap kali servis berpindah.
+  var SERVE_TAG_MS = 8000;
+  var serveTag = { side: "", until: 0 };
+  // Kartu "AKHIR SET" tampil sebentar setiap kali set selesai.
+  var SET_END_MS = 8000;
+  var setEnd = { count: null, until: 0 };
 
   function clampInt(value, min, max, fallback) {
     var n = parseInt(value, 10);
@@ -88,21 +96,25 @@
         logo: "",
         score: 0,
         color: "#2563eb",
-        setsWon: 0
+        setsWon: 0,
+        timeouts: 0
       },
       away: {
         name: "AWAY",
         logo: "",
         score: 0,
         color: "#dc2626",
-        setsWon: 0
+        setsWon: 0,
+        timeouts: 0
       },
       period: "SET 1",
       clock: "",
       status: "",
       sets: [],
       serving: "",
-      timeout: null
+      timeout: null,
+      isFinished: false,
+      theme: { primary: "#001c54", accent: "#c00000" }
     };
   }
 
@@ -126,6 +138,11 @@
       });
     }
 
+    model.isFinished = data.isFinished === true;
+    if (data.theme) {
+      model.theme.primary = sanitizeHex(data.theme.primary, model.theme.primary);
+      model.theme.accent = sanitizeHex(data.theme.accent, model.theme.accent);
+    }
     model.serving = VALID_SIDES.indexOf(data.serving) === -1 ? "" : data.serving;
     if (data.timeout && VALID_SIDES.indexOf(data.timeout.side) !== -1) {
       var duration = clampInt(data.timeout.duration, 1, 600, 30);
@@ -142,6 +159,7 @@
       model.home.score = clampInt(data.home.score, 0, 999, 0);
       model.home.color = sanitizeHex(data.home.color, model.home.color);
       model.home.setsWon = clampInt(data.home.setsWon, 0, 9, 0);
+      model.home.timeouts = clampInt(data.home.timeouts, 0, 2, 0);
     }
     if (data.away) {
       model.away.name = sanitizeText(data.away.name, model.away.name, 24);
@@ -149,6 +167,7 @@
       model.away.score = clampInt(data.away.score, 0, 999, 0);
       model.away.color = sanitizeHex(data.away.color, model.away.color);
       model.away.setsWon = clampInt(data.away.setsWon, 0, 9, 0);
+      model.away.timeouts = clampInt(data.away.timeouts, 0, 2, 0);
     }
     return model;
   }
@@ -184,6 +203,7 @@
     els.overlay.className = "overlay scene-" + scene + " sport-" + model.sport;
     document.documentElement.style.setProperty("--home-color", model.home.color);
     document.documentElement.style.setProperty("--away-color", model.away.color);
+    applyTheme(model.theme);
 
     if (!els.overlay.dataset.entered) {
       els.overlay.dataset.entered = "1";
@@ -196,6 +216,7 @@
     setScore(els.homeScore, "home", model.home.score);
     setScore(els.awayScore, "away", model.away.score);
     renderServe(model);
+    renderTimeouts(model);
     renderTag(model);
     els.homeSetsWon.textContent = model.sport === "volley" ? model.home.setsWon : "";
     els.awaySetsWon.textContent = model.sport === "volley" ? model.away.setsWon : "";
@@ -233,45 +254,108 @@
     els.awayServe.hidden = serving !== "away";
   }
 
-  // Label di bawah papan skor: TIME OUT (prioritas) atau SERVIS.
-  function renderTag(model) {
-    var mode = "";
-    var side = "";
-    if (model.timeout) {
-      mode = "timeout";
-      side = model.timeout.side;
-    } else if (model.sport === "volley" && model.serving) {
-      mode = "serve";
-      side = model.serving;
+  // Kondisi set point / match point voli (best of 5, set ke-5 sampai 15).
+  function pointSituation(model) {
+    if (model.sport !== "volley" || model.isFinished) return null;
+    var target = model.sets.length === 4 ? 15 : 25;
+    var h = model.home.score;
+    var a = model.away.score;
+    var side = h > a ? "home" : a > h ? "away" : "";
+    if (!side || Math.max(h, a) < target - 1) return null;
+    return { side: side, label: model[side].setsWon === 2 ? "MATCH POINT" : "SET POINT" };
+  }
+
+  function formatClock(seconds) {
+    return Math.floor(seconds / 60) + ":" + String(seconds % 60).padStart(2, "0");
+  }
+
+  // Isi label di bawah papan skor, urutan prioritas:
+  // TIME OUT > AKHIR SET > SET/MATCH POINT > SERVIS.
+  function tagContent(model) {
+    var now = Date.now();
+
+    if (model.sets.length > setEnd.count && els.overlay.dataset.ready) {
+      setEnd.until = now + SET_END_MS;
+    }
+    setEnd.count = model.sets.length;
+
+    if (model.serving !== serveTag.side) {
+      serveTag.side = model.serving;
+      serveTag.until = model.serving ? now + SERVE_TAG_MS : 0;
     }
 
-    if (!mode) {
+    if (model.timeout) {
+      var t = model.timeout;
+      return {
+        mode: "timeout", side: t.side, label: "TIME OUT",
+        clock: formatClock(t.remaining), progress: t.remaining / t.duration
+      };
+    }
+
+    if (now < setEnd.until && model.sets.length) {
+      var index = model.sets.length - 1;
+      var last = model.sets[index];
+      return {
+        mode: "set", side: last.home >= last.away ? "home" : "away",
+        label: "AKHIR SET " + (index + 1), clock: last.home + "-" + last.away, key: index
+      };
+    }
+
+    var point = pointSituation(model);
+    if (point) return { mode: "point", side: point.side, label: point.label, key: point.label };
+
+    if (model.sport === "volley" && model.serving && now < serveTag.until) {
+      return { mode: "serve", side: model.serving, label: "SERVIS" };
+    }
+
+    return null;
+  }
+
+  function renderTag(model) {
+    var content = tagContent(model);
+    if (!content) {
       hideTag();
       return;
     }
 
     var tag = els.bugTag;
-    var key = mode + ":" + side;
+    var key = content.mode + ":" + content.side + ":" + (content.key || "");
     if (tag.dataset.key !== key) {
       tag.dataset.key = key;
       tag.hidden = false;
       tag.classList.remove("is-hiding");
       replay(tag, "is-showing");
     }
-    tag.classList.toggle("is-timeout", mode === "timeout");
-    tag.style.setProperty("--tag-color", model[side].color);
-    els.bugTagLabel.textContent = mode === "timeout" ? "TIME OUT" : "SERVIS";
-    els.bugTagTeam.textContent = model[side].name;
+    ["timeout", "set", "point", "serve"].forEach(function (mode) {
+      tag.classList.toggle("is-" + mode, content.mode === mode);
+    });
+    tag.style.setProperty("--tag-color", model[content.side].color);
+    els.bugTagLabel.textContent = content.label;
+    els.bugTagTeam.textContent = model[content.side].name;
+    els.bugTagClock.hidden = !content.clock;
+    els.bugTagClock.textContent = content.clock || "";
+    els.bugTagProgress.style.transform = "scaleX(" + (content.progress || 0) + ")";
+  }
 
-    if (mode === "timeout") {
-      var r = model.timeout.remaining;
-      els.bugTagClock.hidden = false;
-      els.bugTagClock.textContent = Math.floor(r / 60) + ":" + String(r % 60).padStart(2, "0");
-      els.bugTagProgress.style.transform = "scaleX(" + (r / model.timeout.duration) + ")";
-    } else {
-      els.bugTagClock.hidden = true;
-      els.bugTagProgress.style.transform = "scaleX(0)";
-    }
+  // Titik sisa jatah timeout (voli: 2 per set).
+  function renderTimeouts(model) {
+    ["home", "away"].forEach(function (side) {
+      var dots = els[side + "Timeouts"];
+      dots.hidden = model.sport !== "volley";
+      Array.prototype.forEach.call(dots.children, function (dot, i) {
+        dot.classList.toggle("is-used", i < model[side].timeouts);
+      });
+    });
+  }
+
+  // Warna tema dari pengaturan (warna utama dan aksen).
+  function applyTheme(theme) {
+    var root = document.documentElement.style;
+    var hex = theme.primary.slice(1);
+    var rgb = [0, 2, 4].map(function (i) { return parseInt(hex.slice(i, i + 2), 16); });
+    root.setProperty("--gt-navy", theme.primary);
+    root.setProperty("--gt-navy-90", "rgba(" + rgb.join(", ") + ", 0.9)");
+    root.setProperty("--gt-red", theme.accent);
   }
 
   function hideTag() {
