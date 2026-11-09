@@ -304,6 +304,7 @@
       </div>
       <div class="topbar-right">
         <a href="{{ route('overlay') }}" target="_blank" class="btn-link">vMix Overlay</a>
+        <a href="{{ route('lower-thirds.index') }}" class="btn-link">Lower Third</a>
         <a href="{{ route('history') }}" class="btn-link">Riwayat</a>
         <a href="{{ route('account.edit') }}" class="btn-link">Akun</a>
         @if (auth()->user()->isAdmin())
