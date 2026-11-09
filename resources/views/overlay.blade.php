@@ -13,7 +13,6 @@
     {{-- Papan skor pojok kiri (GT 11 SCOREBOARD LONG LOGO NEW) --}}
     <div class="scorebug" id="scorebug" aria-hidden="true">
       <span class="bug-logo" id="bugLogo">
-        <img id="liveLogo" alt="" hidden />
         <svg class="logo-volley" viewBox="0 0 200 200" role="img" aria-label="Bola voli">
           <circle cx="100" cy="100" r="92" fill="#d9d9d9" stroke="#fff" stroke-width="5" />
           <g fill="none" stroke="#001c54" stroke-width="7" stroke-linecap="round">
@@ -23,12 +22,19 @@
             <path d="M12 116c44 16 132 16 176 0" />
           </g>
         </svg>
-        <svg class="logo-futsal" viewBox="0 0 200 200" role="img" aria-label="Bola futsal">
-          <circle cx="100" cy="100" r="92" fill="#d9d9d9" stroke="#fff" stroke-width="5" />
-          <path d="M100 42l48 35-18 56H70L52 77z" fill="#001c54" />
-          <g stroke="#001c54" stroke-width="7">
-            <path d="M100 42V10M148 77l30-10M130 133l19 25M70 133l-19 25M52 77L22 67" />
+        <svg class="logo-futsal" viewBox="0 0 200 200" role="img" aria-label="Bola sepak">
+          <defs><clipPath id="ballClip"><circle cx="100" cy="100" r="90" /></clipPath></defs>
+          <circle cx="100" cy="100" r="92" fill="#ffffff" />
+          <g clip-path="url(#ballClip)" fill="#001c54">
+            <polygon points="100.0,70.0 128.5,90.7 117.6,124.3 82.4,124.3 71.5,90.7" />
+            <polygon points="100.0,38.0 71.5,17.3 82.4,-16.3 117.6,-16.3 128.5,17.3" />
+            <polygon points="159.0,80.8 169.9,47.3 205.1,47.3 216.0,80.8 187.5,101.6" />
+            <polygon points="136.4,150.2 171.7,150.2 182.6,183.7 154.1,204.4 125.5,183.7" />
+            <polygon points="63.6,150.2 74.5,183.7 45.9,204.4 17.4,183.7 28.3,150.2" />
+            <polygon points="41.0,80.8 12.5,101.6 -16.0,80.8 -5.1,47.3 30.1,47.3" />
+            <path d="M100.0 70.0L100.0 38.0 M128.5 90.7L159.0 80.8 M117.6 124.3L136.4 150.2 M82.4 124.3L63.6 150.2 M71.5 90.7L41.0 80.8" stroke="#001c54" stroke-width="6" />
           </g>
+          <circle cx="100" cy="100" r="92" fill="none" stroke="#fff" stroke-width="5" />
         </svg>
       </span>
 
@@ -37,7 +43,6 @@
           <span class="bug-name">
             <span class="bug-color" id="homeColor"></span>
             <span class="bug-team" id="homeName">HOME</span>
-            <span class="bug-timeouts" id="homeTimeouts"><i></i><i></i></span>
             <span class="bug-serve" id="homeServe" hidden></span>
           </span>
           <span class="bug-sets" id="homeSetsWon">0</span>
@@ -47,7 +52,6 @@
           <span class="bug-name">
             <span class="bug-color" id="awayColor"></span>
             <span class="bug-team" id="awayName">AWAY</span>
-            <span class="bug-timeouts" id="awayTimeouts"><i></i><i></i></span>
             <span class="bug-serve" id="awayServe" hidden></span>
           </span>
           <span class="bug-sets" id="awaySetsWon">0</span>
@@ -67,6 +71,9 @@
 
     {{-- Layar mulai/selesai (GT 01 VOLLEYBALL 2 OPENING B) --}}
     <div class="intro" id="intro" aria-hidden="true">
+      <div class="intro-event-logo" id="introEventLogo" hidden>
+        <img id="introEventLogoImg" alt="" />
+      </div>
       <div class="intro-headline" id="introSport">VOLI</div>
       <div class="intro-panel">
         <span class="intro-shine" aria-hidden="true"></span>
@@ -83,6 +90,7 @@
       <div class="intro-strip">
         <span id="introDesc">LIVE • SET 1</span>
       </div>
+      <div class="intro-venue" id="introVenue" hidden></div>
       <div class="intro-teams">
         <div class="intro-team intro-team-home" id="introHomeTeam">
           <span class="intro-team-name" id="introHomeName">HOME</span>
@@ -94,6 +102,9 @@
       <div class="intro-sets" id="introSets" hidden></div>
     </div>
   </div>
+
+  {{-- Konfeti pemenang di scene selesai --}}
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
 
   {{-- Lower third (scene=lower) --}}
   <div class="lower" id="lowerThird" hidden>

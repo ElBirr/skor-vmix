@@ -21,6 +21,8 @@ class Pertandingan extends Model
         'period',
         'clock',
         'status',
+        'venue',
+        'match_date',
         'home_color',
         'away_color',
         'theme_primary',
@@ -44,6 +46,7 @@ class Pertandingan extends Model
         'away_timeouts' => 'integer',
         'is_active' => 'boolean',
         'is_finished' => 'boolean',
+        'match_date' => 'date',
     ];
 
     public function scopeActive($query)
@@ -175,6 +178,8 @@ class Pertandingan extends Model
             'period' => $this->period,
             'clock' => $this->clock,
             'status' => $this->status,
+            'venue' => (string) $this->venue,
+            'date' => $this->match_date?->toDateString() ?? '',
             'sets' => $this->set_scores ?? [],
             'currentSet' => $this->current_set,
             'serving' => $this->serving,
