@@ -283,6 +283,7 @@ class MatchController extends Controller
             'period' => 'required|string|max:20',
             'clock' => 'nullable|string|max:10',
             'status' => 'nullable|string|max:20',
+            'headline' => 'nullable|string|max:40',
             'venue' => 'nullable|string|max:60',
             'match_date' => 'nullable|date',
             'home_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],

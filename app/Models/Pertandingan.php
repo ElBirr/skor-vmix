@@ -21,6 +21,7 @@ class Pertandingan extends Model
         'period',
         'clock',
         'status',
+        'headline',
         'venue',
         'match_date',
         'home_color',
@@ -60,6 +61,7 @@ class Pertandingan extends Model
         $previous = self::latest('id')->first();
 
         return new self([
+            'headline' => $previous->headline ?? null,
             'theme_primary' => $previous->theme_primary ?? '#001c54',
             'theme_accent' => $previous->theme_accent ?? '#c00000',
             'is_active' => true,
@@ -178,6 +180,7 @@ class Pertandingan extends Model
             'period' => $this->period,
             'clock' => $this->clock,
             'status' => $this->status,
+            'headline' => (string) $this->headline,
             'venue' => (string) $this->venue,
             'date' => $this->match_date?->toDateString() ?? '',
             'sets' => $this->set_scores ?? [],

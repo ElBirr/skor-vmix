@@ -133,11 +133,13 @@ class MatchTest extends TestCase
         $match = Pertandingan::active()->first();
         $this->post('/match', [
             ...$match->only(['sport', 'period', 'home_name', 'away_name', 'home_color', 'away_color']),
+            'headline' => 'PORPROV 2026',
             'venue' => 'GOR Satria',
             'match_date' => '2026-11-09',
         ])->assertRedirect();
 
         $this->getJson('/api/match')
+            ->assertJsonPath('headline', 'PORPROV 2026')
             ->assertJsonPath('venue', 'GOR Satria')
             ->assertJsonPath('date', '2026-11-09');
     }
