@@ -25,6 +25,7 @@
     awayColor: document.getElementById("awayColor"),
     homeSetsWon: document.getElementById("homeSetsWon"),
     awaySetsWon: document.getElementById("awaySetsWon"),
+    intro: document.getElementById("intro"),
     introSport: document.getElementById("introSport"),
     introDesc: document.getElementById("introDesc"),
     introHomeName: document.getElementById("introHomeName"),
