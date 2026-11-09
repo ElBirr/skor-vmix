@@ -36,6 +36,7 @@
           <span class="bug-name">
             <span class="bug-color" id="homeColor"></span>
             <span class="bug-team" id="homeName">HOME</span>
+            <span class="bug-serve" id="homeServe" hidden></span>
           </span>
           <span class="bug-sets" id="homeSetsWon">0</span>
           <span class="bug-score" id="homeScore">0</span>
@@ -44,10 +45,20 @@
           <span class="bug-name">
             <span class="bug-color" id="awayColor"></span>
             <span class="bug-team" id="awayName">AWAY</span>
+            <span class="bug-serve" id="awayServe" hidden></span>
           </span>
           <span class="bug-sets" id="awaySetsWon">0</span>
           <span class="bug-score" id="awayScore">0</span>
         </div>
+      </div>
+
+      {{-- Info servis / timeout di bawah papan skor --}}
+      <div class="bug-tag" id="bugTag" hidden>
+        <span class="bug-tag-color" id="bugTagColor"></span>
+        <span class="bug-tag-label" id="bugTagLabel">SERVIS</span>
+        <span class="bug-tag-team" id="bugTagTeam">HOME</span>
+        <span class="bug-tag-clock" id="bugTagClock" hidden></span>
+        <span class="bug-tag-progress" id="bugTagProgress"></span>
       </div>
     </div>
 
@@ -55,11 +66,13 @@
     <div class="intro" id="intro" aria-hidden="true">
       <div class="intro-headline" id="introSport">VOLI</div>
       <div class="intro-panel">
-        <div class="intro-logo">
+        <span class="intro-shine" aria-hidden="true"></span>
+        <div class="intro-logo intro-logo-home">
           <img id="introHomeLogo" alt="" hidden />
           <span class="intro-logo-fallback" id="introHomeFallback">H</span>
         </div>
-        <div class="intro-logo">
+        <div class="intro-vs">VS</div>
+        <div class="intro-logo intro-logo-away">
           <img id="introAwayLogo" alt="" hidden />
           <span class="intro-logo-fallback" id="introAwayFallback">A</span>
         </div>
@@ -68,10 +81,12 @@
         <span id="introDesc">LIVE • SET 1</span>
       </div>
       <div class="intro-teams">
-        <div class="intro-team">
+        <div class="intro-team intro-team-home" id="introHomeTeam">
+          <span class="intro-winner">PEMENANG</span>
           <span class="intro-team-name" id="introHomeName">HOME</span>
         </div>
-        <div class="intro-team">
+        <div class="intro-team intro-team-away" id="introAwayTeam">
+          <span class="intro-winner">PEMENANG</span>
           <span class="intro-team-name" id="introAwayName">AWAY</span>
         </div>
       </div>
