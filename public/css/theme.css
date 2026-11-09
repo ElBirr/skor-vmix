@@ -604,3 +604,71 @@ input::placeholder {
 .control-btn:disabled {
   opacity: 0.6;
 }
+
+/* ---------- Tablet & layar sentuh ---------- */
+button,
+.btn,
+.control-btn,
+.nav a {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tombol aksi di baris tabel berdampingan, tidak bertumpuk */
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 230px;
+}
+
+/* Tombol simpan pengaturan menempel di bawah layar */
+.form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 -2px 18px;
+  padding: 12px 2px;
+  background: linear-gradient(transparent, var(--gt-navy-deep) 30%);
+}
+
+@media (max-width: 1200px) and (pointer: coarse), (max-width: 1100px) {
+  .btn,
+  .inline-form .btn {
+    min-height: 44px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  input,
+  select {
+    min-height: 46px;
+    font-size: 16px; /* cegah zoom otomatis iPad saat fokus input */
+  }
+
+  .inline-form select,
+  .inline-form input {
+    min-height: 44px;
+    font-size: 15px;
+  }
+
+  .nav-links a,
+  .nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+  }
+
+  .control-btn {
+    min-height: 84px;
+  }
+
+  .table td,
+  .table th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}

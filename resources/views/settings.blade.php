@@ -144,8 +144,11 @@
             </div>
       </div>
 
-      <button type="submit" class="btn">{{ $isNewMatch ? 'Mulai Pertandingan' : 'Simpan Pengaturan' }}</button>
-      @if (! $isNewMatch)<a href="{{ route('scoreboard') }}" class="btn btn-secondary" style="margin-left: 8px;">Selesai &amp; Kembali</a>@endif
+      {{-- Menempel di bawah layar supaya Simpan selalu terjangkau di tablet --}}
+      <div class="form-actions">
+        <button type="submit" class="btn">{{ $isNewMatch ? 'Mulai Pertandingan' : 'Simpan Pengaturan' }}</button>
+        @if (! $isNewMatch)<a href="{{ route('scoreboard') }}" class="btn btn-secondary">Selesai &amp; Kembali</a>@endif
+      </div>
     </form>
 
     @if (! $isNewMatch)
