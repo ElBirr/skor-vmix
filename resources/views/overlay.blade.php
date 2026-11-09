@@ -123,6 +123,7 @@
     <div class="brk-bg" aria-hidden="true"></div>
     <div class="brk-wipe" aria-hidden="true"><i></i><i></i><i></i></div>
     <div class="brk-content">
+      <img class="brk-logo" id="breakLogo" alt="" hidden />
       <div class="brk-headline" id="breakHeadline">VOLI</div>
       <img class="brk-art" src="{{ asset('img/volleyball.svg') }}" alt="" />
       <div class="brk-title" id="breakTitle">ISTIRAHAT</div>

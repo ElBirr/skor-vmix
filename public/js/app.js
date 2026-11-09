@@ -465,6 +465,8 @@
   function renderEventHeader(model) {
     var logo = els.introEventLogoImg.dataset.failed === model.logo ? "" : model.logo;
     els.introEventLogo.hidden = !logo;
+    // Logo event sudah berisi nama event; headline hanya tampil bila diisi khusus.
+    els.intro.classList.toggle("has-event-logo", !!logo && !model.headline);
     if (logo && els.introEventLogoImg.getAttribute("src") !== logo) els.introEventLogoImg.src = logo;
 
     var parts = [];

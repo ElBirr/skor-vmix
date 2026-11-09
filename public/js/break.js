@@ -15,6 +15,7 @@
   var root = document.getElementById("breakScene");
   var els = {
     headline: document.getElementById("breakHeadline"),
+    logo: document.getElementById("breakLogo"),
     title: document.getElementById("breakTitle"),
     match: document.getElementById("breakMatch"),
     info: document.getElementById("breakInfo")
@@ -43,6 +44,12 @@
     applyTheme(data);
     var sport = data.sport === "futsal" ? "FUTSAL" : "VOLI";
     els.headline.textContent = text(data.headline, 40) || sport;
+
+    var logo = /^(https?:\/\/|\/)/i.test(data.logo || "") ? data.logo : "";
+    if (logo && els.logo.dataset.failed === logo) logo = "";
+    els.logo.hidden = !logo;
+    if (logo && els.logo.getAttribute("src") !== logo) els.logo.src = logo;
+    root.classList.toggle("has-event-logo", !!logo && !data.headline);
 
     var home = data.home || {};
     var away = data.away || {};
@@ -95,7 +102,14 @@
   root.classList.add("brk-" + scene);
   els.title.textContent = text(params.get("text"), 40) || "ISTIRAHAT";
 
+  els.logo.addEventListener("error", function () {
+    els.logo.dataset.failed = els.logo.getAttribute("src") || "";
+    els.logo.hidden = true;
+    root.classList.remove("has-event-logo");
+  });
+
   if (scene === "transition") {
+    poll();
     window.overlayIn = playStinger;
     window.overlayOut = function () {
       root.classList.remove("is-playing");
