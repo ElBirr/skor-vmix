@@ -18,8 +18,6 @@
 
   var els = {
     overlay: document.getElementById("overlay"),
-    bugLogo: document.getElementById("bugLogo"),
-    liveLogo: document.getElementById("liveLogo"),
     homeName: document.getElementById("homeName"),
     awayName: document.getElementById("awayName"),
     homeScore: document.getElementById("homeScore"),
@@ -228,7 +226,6 @@
     renderTag(model);
     els.homeSetsWon.textContent = model.sport === "volley" ? model.home.setsWon : "";
     els.awaySetsWon.textContent = model.sport === "volley" ? model.away.setsWon : "";
-    renderEventLogo(model.logo);
 
     // Scene mulai/selesai
     els.introSport.textContent = model.sport === "futsal" ? "FUTSAL" : "VOLI";
@@ -451,18 +448,6 @@
     return parts.join(" • ");
   }
 
-  function renderEventLogo(url) {
-    if (!url || els.liveLogo.dataset.failed === url) {
-      els.liveLogo.hidden = true;
-      els.liveLogo.removeAttribute("src");
-      els.bugLogo.classList.remove("has-logo");
-      return;
-    }
-    if (els.liveLogo.getAttribute("src") !== url) els.liveLogo.src = url;
-    els.liveLogo.hidden = false;
-    els.bugLogo.classList.add("has-logo");
-  }
-
   function renderTeamLogo(img, fallback, team) {
     if (team.logo && img.dataset.failed !== team.logo) {
       if (img.getAttribute("src") !== team.logo) img.src = team.logo;
@@ -591,10 +576,6 @@
     playEnter();
   };
 
-  wireLogoFallback(els.liveLogo, null, function () {
-    els.liveLogo.hidden = true;
-    els.bugLogo.classList.remove("has-logo");
-  });
   wireLogoFallback(els.introHomeLogo, els.introHomeFallback);
   wireLogoFallback(els.introAwayLogo, els.introAwayFallback);
   applyAndRender(defaultModel());

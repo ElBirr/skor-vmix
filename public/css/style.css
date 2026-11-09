@@ -66,15 +66,10 @@ body {
   height: 79px;
 }
 
-.bug-logo img,
 .bug-logo svg {
   width: 100%;
   height: 100%;
   object-fit: contain;
-}
-
-.bug-logo.has-logo svg {
-  display: none;
 }
 
 .bug-panel {
