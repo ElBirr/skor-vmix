@@ -12,6 +12,7 @@
       <span class="nav-links">
         <a href="{{ route('scoreboard') }}" @class(['active' => request()->routeIs('scoreboard')])>Skor</a>
         <a href="{{ route('settings') }}" @class(['active' => request()->routeIs('settings')])>Pengaturan</a>
+        <a href="{{ route('lower-thirds.index') }}" @class(['active' => request()->routeIs('lower-thirds*')])>Lower Third</a>
         <a href="{{ route('history') }}" @class(['active' => request()->routeIs('history*')])>Riwayat</a>
         @if (auth()->user()->isAdmin())
           <a href="{{ route('admin.dashboard') }}" @class(['active' => request()->routeIs('admin*')])>Admin</a>

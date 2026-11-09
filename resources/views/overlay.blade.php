@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="api-url" content="{{ route('api.match') }}" />
+  <meta name="api-lower-url" content="{{ route('api.lower-third') }}" />
   <title>vMix Scoreboard Overlay</title>
   <link rel="stylesheet" href="{{ asset('css/style.css') }}" />
 </head>
@@ -94,6 +95,19 @@
     </div>
   </div>
 
+  {{-- Lower third (scene=lower) --}}
+  <div class="lower" id="lowerThird" hidden>
+    <span class="lower-accent" id="lowerLogo">
+      <img id="lowerLogoImg" alt="" />
+    </span>
+    <div class="lower-body">
+      <div class="lower-title" id="lowerTitle"></div>
+      <div class="lower-sub" id="lowerSubtitle" hidden></div>
+      <span class="lower-progress" id="lowerProgress" hidden></span>
+    </div>
+  </div>
+
   <script src="{{ asset('js/app.js') }}"></script>
+  <script src="{{ asset('js/lower-third.js') }}"></script>
 </body>
 </html>
