@@ -23,7 +23,7 @@ Papan skor lapangan untuk voli dan futsal, lengkap dengan overlay broadcast untu
 - Halaman transparan siap dipakai sebagai Browser Input vMix (1920×1080).
 - `scene=live` (default): papan skor kecil di pojok kiri atas, tampil sepanjang pertandingan (nama tim, set dimenangkan, dan poin).
 - `scene=start` atau `scene=end`: layar nama tim dan logo untuk mulai/selesai.
-- Logo tim opsional lewat query `logo` (logo event), `homeLogo` / `awayLogo` (logo tim), atau isi URL logo di halaman pengaturan. Jika kosong dipakai ikon olahraga / inisial tim.
+- Logo event dan logo tim diunggah lewat halaman pengaturan (jpg, png, gif, atau webp maks. 2 MB). Kalau kosong dipakai ikon olahraga / inisial tim. Query `logo`, `homeLogo`, `awayLogo` masih bisa dipakai untuk override manual.
 - Override tampilan lewat query string tanpa mengubah data pertandingan:
   `scene`, `sport`, `logo`, `home`, `away`, `homeScore`, `awayScore`, `homeColor`, `awayColor`, `homeLogo`, `awayLogo`, `period`, `clock`/`time`, `status`.
 - Kontrol via JavaScript dari vMix: `window.updateScoreboard({ home: { score: 10 } })`; panggil `window.resetScoreboard()` untuk kembali mengikuti data server.
@@ -48,6 +48,7 @@ cp .env.example .env
 php artisan key:generate
 php -r "file_exists('database/database.sqlite') || touch('database/database.sqlite');"
 php artisan migrate
+php artisan storage:link
 php artisan serve
 ```
 

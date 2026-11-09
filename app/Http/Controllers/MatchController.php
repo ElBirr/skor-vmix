@@ -222,9 +222,9 @@ class MatchController extends Controller
             'away_name' => 'required|string|max:50',
             'home_sub' => 'nullable|string|max:50',
             'away_sub' => 'nullable|string|max:50',
-            'home_logo' => 'nullable|string|max:2048',
-            'away_logo' => 'nullable|string|max:2048',
-            'logo' => 'nullable|string|max:2048',
+            'home_logo' => 'nullable|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            'away_logo' => 'nullable|mimes:jpg,jpeg,png,gif,webp|max:2048',
+            'logo' => 'nullable|mimes:jpg,jpeg,png,gif,webp|max:2048',
             'period' => 'required|string|max:20',
             'clock' => 'nullable|string|max:10',
             'status' => 'nullable|string|max:20',
@@ -235,6 +235,15 @@ class MatchController extends Controller
         foreach (['clock', 'status', 'home_sub', 'away_sub'] as $field) {
             if (($data[$field] ?? null) === null) {
                 $data[$field] = '';
+            }
+        }
+
+        // Logo disimpan sebagai file; kalau tidak ada upload baru, logo lama dipertahankan.
+        foreach (['logo', 'home_logo', 'away_logo'] as $field) {
+            if ($request->hasFile($field)) {
+                $data[$field] = '/storage/'.$request->file($field)->store('logos', 'public');
+            } else {
+                unset($data[$field]);
             }
         }
 

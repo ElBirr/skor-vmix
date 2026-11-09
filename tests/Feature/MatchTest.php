@@ -6,6 +6,8 @@ use App\Models\Pertandingan;
 use App\Models\User;
 use Database\Seeders\MatchSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class MatchTest extends TestCase
@@ -279,8 +281,9 @@ class MatchTest extends TestCase
             ->assertJsonPath('isFinished', true);
     }
 
-    public function test_logo_urls_are_saved_and_exposed_to_the_overlay(): void
+    public function test_logo_uploads_are_saved_and_exposed_to_the_overlay(): void
     {
+        Storage::fake('public');
         $this->createMatch();
 
         $this->post('/match', [
@@ -291,16 +294,54 @@ class MatchTest extends TestCase
             'away_name' => 'TIM B',
             'home_color' => '#e11d48',
             'away_color' => '#2563eb',
-            'accent' => '#c00000',
-            'logo' => 'https://example.com/event.png',
-            'home_logo' => 'https://example.com/home.png',
-            'away_logo' => '/logos/away.png',
-        ])->assertRedirect();
+            'logo' => UploadedFile::fake()->image('event.png'),
+            'home_logo' => UploadedFile::fake()->image('home.png'),
+            'away_logo' => UploadedFile::fake()->image('away.png'),
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $match = Pertandingan::active()->first();
+
+        foreach (['logo', 'home_logo', 'away_logo'] as $field) {
+            $this->assertStringStartsWith('/storage/logos/', $match->{$field});
+            Storage::disk('public')->assertExists(str_replace('/storage/', '', $match->{$field}));
+        }
 
         $this->getJson('/api/match')
             ->assertOk()
-            ->assertJsonPath('logo', 'https://example.com/event.png')
-            ->assertJsonPath('home.logo', 'https://example.com/home.png')
-            ->assertJsonPath('away.logo', '/logos/away.png');
+            ->assertJsonPath('logo', $match->logo)
+            ->assertJsonPath('home.logo', $match->home_logo)
+            ->assertJsonPath('away.logo', $match->away_logo);
+
+        // Tanpa upload baru, logo lama tetap dipakai.
+        $this->post('/match', [
+            'sport' => 'volley',
+            'period' => 'SET 1',
+            'status' => 'LIVE',
+            'home_name' => 'TIM A',
+            'away_name' => 'TIM B',
+            'home_color' => '#e11d48',
+            'away_color' => '#2563eb',
+        ])->assertRedirect();
+
+        $this->assertSame($match->home_logo, $match->fresh()->home_logo);
+    }
+
+    public function test_logo_upload_rejects_non_image_files(): void
+    {
+        Storage::fake('public');
+        $this->createMatch();
+
+        $this->post('/match', [
+            'sport' => 'volley',
+            'period' => 'SET 1',
+            'status' => 'LIVE',
+            'home_name' => 'TIM A',
+            'away_name' => 'TIM B',
+            'home_color' => '#e11d48',
+            'away_color' => '#2563eb',
+            'home_logo' => UploadedFile::fake()->create('evil.php', 10, 'application/x-php'),
+        ])->assertSessionHasErrors('home_logo');
+
+        $this->assertNull(Pertandingan::active()->first()->home_logo);
     }
 }

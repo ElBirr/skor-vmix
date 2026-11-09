@@ -39,7 +39,7 @@
       </div>
     @endif
 
-    <form method="POST" action="{{ route('match.update') }}">
+    <form method="POST" action="{{ route('match.update') }}" enctype="multipart/form-data">
       @csrf
 
       <div class="card">
@@ -77,8 +77,11 @@
             <input type="text" name="home_name" value="{{ $match->home_name }}" maxlength="50" required />
             <label>Pelatih / Sub (Home)</label>
             <input type="text" name="home_sub" value="{{ $match->home_sub }}" maxlength="50" />
-            <label>Logo Home (URL)</label>
-            <input type="text" name="home_logo" value="{{ $match->home_logo }}" maxlength="2048" placeholder="https://..." />
+            <label>Logo Home (upload)</label>
+            @if ($match->home_logo)
+              <img src="{{ $match->home_logo }}" alt="Logo Home" style="display:block;height:48px;margin-bottom:6px;" />
+            @endif
+            <input type="file" name="home_logo" accept="image/*" />
             <label>Warna Home (hex)</label>
             <input type="text" name="home_color" value="{{ $match->home_color }}" maxlength="7" />
           </div>
@@ -87,8 +90,11 @@
             <input type="text" name="away_name" value="{{ $match->away_name }}" maxlength="50" required />
             <label>Pelatih / Sub (Away)</label>
             <input type="text" name="away_sub" value="{{ $match->away_sub }}" maxlength="50" />
-            <label>Logo Away (URL)</label>
-            <input type="text" name="away_logo" value="{{ $match->away_logo }}" maxlength="2048" placeholder="https://..." />
+            <label>Logo Away (upload)</label>
+            @if ($match->away_logo)
+              <img src="{{ $match->away_logo }}" alt="Logo Away" style="display:block;height:48px;margin-bottom:6px;" />
+            @endif
+            <input type="file" name="away_logo" accept="image/*" />
             <label>Warna Away (hex)</label>
             <input type="text" name="away_color" value="{{ $match->away_color }}" maxlength="7" />
           </div>
@@ -97,8 +103,11 @@
 
       <div class="card">
         <h2>Opsi Tampilan</h2>
-        <label>Logo Event / Turnamen (URL)</label>
-        <input type="text" name="logo" value="{{ $match->logo }}" maxlength="2048" placeholder="https://..." />
+        <label>Logo Event / Turnamen (upload)</label>
+        @if ($match->logo)
+          <img src="{{ $match->logo }}" alt="Logo Event" style="display:block;height:48px;margin-bottom:6px;" />
+        @endif
+        <input type="file" name="logo" accept="image/*" />
       </div>
 
       <button type="submit" class="btn">{{ $isNewMatch ? 'Mulai Pertandingan' : 'Simpan Pengaturan' }}</button>
