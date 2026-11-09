@@ -107,6 +107,16 @@
 
       <div class="card">
         <h2>Opsi Tampilan</h2>
+        <div class="row">
+          <div>
+            <label>Venue / Lokasi (tampil di Opening)</label>
+            <input type="text" name="venue" value="{{ old('venue', $match->venue) }}" maxlength="60" placeholder="GOR Satria" />
+          </div>
+          <div>
+            <label>Tanggal Pertandingan</label>
+            <input type="date" name="match_date" value="{{ old('match_date', $match->match_date?->toDateString()) }}" />
+          </div>
+        </div>
         <label>Logo Event / Turnamen (upload)</label>
         @if ($match->logo)
           <img src="{{ $match->logo }}" alt="Logo Event" style="display:block;height:48px;margin-bottom:6px;" />

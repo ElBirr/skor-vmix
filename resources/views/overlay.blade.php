@@ -71,6 +71,9 @@
 
     {{-- Layar mulai/selesai (GT 01 VOLLEYBALL 2 OPENING B) --}}
     <div class="intro" id="intro" aria-hidden="true">
+      <div class="intro-event-logo" id="introEventLogo" hidden>
+        <img id="introEventLogoImg" alt="" />
+      </div>
       <div class="intro-headline" id="introSport">VOLI</div>
       <div class="intro-panel">
         <span class="intro-shine" aria-hidden="true"></span>
@@ -87,6 +90,7 @@
       <div class="intro-strip">
         <span id="introDesc">LIVE • SET 1</span>
       </div>
+      <div class="intro-venue" id="introVenue" hidden></div>
       <div class="intro-teams">
         <div class="intro-team intro-team-home" id="introHomeTeam">
           <span class="intro-team-name" id="introHomeName">HOME</span>
@@ -98,6 +102,9 @@
       <div class="intro-sets" id="introSets" hidden></div>
     </div>
   </div>
+
+  {{-- Konfeti pemenang di scene selesai --}}
+  <div class="confetti" id="confetti" aria-hidden="true"></div>
 
   {{-- Lower third (scene=lower) --}}
   <div class="lower" id="lowerThird" hidden>

@@ -36,6 +36,12 @@
     introHomeFallback: document.getElementById("introHomeFallback"),
     introAwayFallback: document.getElementById("introAwayFallback"),
     introSets: document.getElementById("introSets"),
+    introEventLogo: document.getElementById("introEventLogo"),
+    introEventLogoImg: document.getElementById("introEventLogoImg"),
+    introVenue: document.getElementById("introVenue"),
+    confetti: document.getElementById("confetti"),
+    introHomeLogoBox: document.querySelector(".intro-logo-home"),
+    introAwayLogoBox: document.querySelector(".intro-logo-away"),
     introVs: document.querySelector(".intro-vs"),
     introHomeTeam: document.getElementById("introHomeTeam"),
     introAwayTeam: document.getElementById("introAwayTeam"),
@@ -60,6 +66,8 @@
   // Kontrol dari halaman operator; hanya bereaksi saat nilainya berubah
   // supaya overlayIn()/overlayOut() dari vMix tetap bisa dipakai.
   var remote = { visible: null, serveCue: null };
+  var confettiPlayed = false;
+  var MONTHS = ["JAN", "FEB", "MAR", "APR", "MEI", "JUN", "JUL", "AGU", "SEP", "OKT", "NOV", "DES"];
 
   function clampInt(value, min, max, fallback) {
     var n = parseInt(value, 10);
@@ -113,6 +121,8 @@
       clock: "",
       status: "",
       currentSet: 1,
+      venue: "",
+      date: "",
       sets: [],
       serving: "",
       timeout: null,
@@ -132,6 +142,8 @@
     model.clock = sanitizeText(data.clock, "", 10);
     model.status = sanitizeText(data.status, "", 20);
     model.currentSet = clampInt(data.currentSet, 1, 5, 1);
+    model.venue = sanitizeText(data.venue, "", 60);
+    model.date = /^\d{4}-\d{2}-\d{2}$/.test(data.date || "") ? data.date : "";
 
     if (Array.isArray(data.sets)) {
       model.sets = data.sets.slice(0, 5).map(function (set) {
@@ -228,6 +240,7 @@
     els.introSport.textContent = model.sport === "futsal" ? "FUTSAL" : "VOLI";
     els.introDesc.textContent = introDescription(model);
     renderWinner(model);
+    renderEventHeader(model);
     els.introHomeName.textContent = model.home.name;
     els.introAwayName.textContent = model.away.name;
     renderTeamLogo(els.introHomeLogo, els.introHomeFallback, model.home);
@@ -373,6 +386,50 @@
     }
     els.introHomeTeam.classList.toggle("is-winner", winner === "home");
     els.introAwayTeam.classList.toggle("is-winner", winner === "away");
+    els.introHomeLogoBox.classList.toggle("is-winner", winner === "home");
+    els.introAwayLogoBox.classList.toggle("is-winner", winner === "away");
+    els.introHomeLogoBox.classList.toggle("is-loser", winner === "away");
+    els.introAwayLogoBox.classList.toggle("is-loser", winner === "home");
+
+    if (winner && !confettiPlayed) {
+      confettiPlayed = true;
+      launchConfetti(model[winner].color);
+    }
+  }
+
+  // Hujan konfeti warna tim pemenang, sekali setiap scene selesai masuk.
+  function launchConfetti(color) {
+    var colors = [color, color, "#ffd400", "#ffffff"];
+    els.confetti.replaceChildren();
+    for (var i = 0; i < 90; i++) {
+      var piece = document.createElement("i");
+      piece.style.left = (Math.random() * 100).toFixed(1) + "%";
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDelay = (1.2 + Math.random() * 1.5).toFixed(2) + "s";
+      piece.style.animationDuration = (2.6 + Math.random() * 1.8).toFixed(2) + "s";
+      piece.style.setProperty("--drift", (Math.random() * 240 - 120).toFixed(0) + "px");
+      piece.style.setProperty("--spin", (Math.random() * 1080 - 540).toFixed(0) + "deg");
+      els.confetti.appendChild(piece);
+    }
+    setTimeout(function () {
+      els.confetti.replaceChildren();
+    }, 6000);
+  }
+
+  // Logo event di atas headline, venue & tanggal di bawah strip (scene mulai).
+  function renderEventHeader(model) {
+    var logo = els.introEventLogoImg.dataset.failed === model.logo ? "" : model.logo;
+    els.introEventLogo.hidden = !logo;
+    if (logo && els.introEventLogoImg.getAttribute("src") !== logo) els.introEventLogoImg.src = logo;
+
+    var parts = [];
+    if (model.venue) parts.push(model.venue);
+    if (model.date) {
+      var d = model.date.split("-");
+      parts.push(parseInt(d[2], 10) + " " + MONTHS[parseInt(d[1], 10) - 1] + " " + d[0]);
+    }
+    els.introVenue.textContent = parts.join(" • ");
+    els.introVenue.hidden = scene !== "start" || parts.length === 0;
   }
 
   // Riwayat skor per set, hanya di scene selesai.
@@ -384,26 +441,41 @@
       return;
     }
 
-    var key = JSON.stringify(model.sets);
+    var key = JSON.stringify([model.sets, model.home.name, model.away.name, model.home.color, model.away.color]);
     if (els.introSets.dataset.key === key) return;
     els.introSets.dataset.key = key;
 
-    els.introSets.replaceChildren();
-    model.sets.forEach(function (set, index) {
-      var chip = document.createElement("span");
-      chip.className = "intro-set";
-      chip.style.setProperty("--i", index);
-
-      var label = document.createElement("b");
-      label.textContent = "Set " + (index + 1);
-      chip.appendChild(label);
-
-      var score = document.createElement("span");
-      score.textContent = set.home + " - " + set.away;
-      chip.appendChild(score);
-
-      els.introSets.appendChild(chip);
+    // Tabel skor per set: baris home & away, kolom tiap set + total set.
+    var table = document.createElement("table");
+    table.className = "intro-set-table";
+    var head = table.insertRow();
+    head.className = "intro-set-head";
+    ["TIM"].concat(model.sets.map(function (_, i) { return "SET " + (i + 1); }), ["SET"]).forEach(function (text, i, all) {
+      var th = document.createElement("th");
+      th.textContent = text;
+      if (i === all.length - 1) th.className = "is-total";
+      head.appendChild(th);
     });
+
+    ["home", "away"].forEach(function (side, row) {
+      var other = side === "home" ? "away" : "home";
+      var tr = table.insertRow();
+      tr.style.setProperty("--i", row);
+      tr.style.setProperty("--row-color", model[side].color);
+      var name = tr.insertCell();
+      name.className = "is-name";
+      name.textContent = model[side].name;
+      model.sets.forEach(function (set) {
+        var td = tr.insertCell();
+        td.textContent = set[side];
+        if (set[side] > set[other]) td.className = "is-won";
+      });
+      var total = tr.insertCell();
+      total.className = "is-total";
+      total.textContent = model[side].setsWon;
+    });
+
+    els.introSets.replaceChildren(table);
     els.introSets.hidden = false;
   }
 
@@ -472,6 +544,7 @@
     el.classList.remove("is-leaving", "is-entering");
     void el.offsetWidth; // paksa animasi bisa diulang
     el.classList.add("is-entering");
+    confettiPlayed = false;
   }
 
   // Gabung partial tanpa menghapus objek home/away hasil merge
@@ -562,6 +635,10 @@
     playEnter();
   };
 
+  els.introEventLogoImg.addEventListener("error", function () {
+    els.introEventLogoImg.dataset.failed = els.introEventLogoImg.getAttribute("src") || "";
+    els.introEventLogo.hidden = true;
+  });
   wireLogoFallback(els.introHomeLogo, els.introHomeFallback);
   wireLogoFallback(els.introAwayLogo, els.introAwayFallback);
   applyAndRender(defaultModel());

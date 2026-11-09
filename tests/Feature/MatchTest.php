@@ -126,6 +126,22 @@ class MatchTest extends TestCase
         $this->assertSame('#ff8800', Pertandingan::newMatch()->theme_accent);
     }
 
+    public function test_venue_and_date_are_sent_to_overlay(): void
+    {
+        $this->createMatch();
+
+        $match = Pertandingan::active()->first();
+        $this->post('/match', [
+            ...$match->only(['sport', 'period', 'home_name', 'away_name', 'home_color', 'away_color']),
+            'venue' => 'GOR Satria',
+            'match_date' => '2026-11-09',
+        ])->assertRedirect();
+
+        $this->getJson('/api/match')
+            ->assertJsonPath('venue', 'GOR Satria')
+            ->assertJsonPath('date', '2026-11-09');
+    }
+
     public function test_volleyball_set_requires_a_two_point_lead(): void
     {
         $this->createMatch();
