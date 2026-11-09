@@ -118,7 +118,26 @@
     </div>
   </div>
 
+  {{-- Layar jeda (scene=break) & stinger transisi (scene=transition) --}}
+  <div class="brk" id="breakScene" hidden>
+    <div class="brk-bg" aria-hidden="true"></div>
+    <div class="brk-wipe" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="brk-content">
+      <img class="brk-logo" id="breakLogo" alt="" hidden />
+      <div class="brk-headline" id="breakHeadline">VOLI</div>
+      <img class="brk-art" src="{{ asset('img/volleyball.svg') }}" alt="" />
+      <div class="brk-title" id="breakTitle">ISTIRAHAT</div>
+      <div class="brk-match" id="breakMatch">
+        <span class="brk-home">HOME</span>
+        <span class="brk-score">0 - 0</span>
+        <span class="brk-away">AWAY</span>
+      </div>
+      <div class="brk-info" id="breakInfo" hidden></div>
+    </div>
+  </div>
+
   <script src="{{ asset('js/app.js') }}"></script>
   <script src="{{ asset('js/lower-third.js') }}"></script>
+  <script src="{{ asset('js/break.js') }}"></script>
 </body>
 </html>
