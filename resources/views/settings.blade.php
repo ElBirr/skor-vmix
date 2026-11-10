@@ -56,6 +56,13 @@
               <option value="futsal" @selected($match->sport === 'futsal')>Futsal</option>
             </select>
           </div>
+          <div>
+            <label>Format Set (voli)</label>
+            <select name="best_of">
+              <option value="3" @selected($match->bestOf() === 3)>Best of 3 &mdash; menang 2 set, set ke-3 sampai 15</option>
+              <option value="5" @selected($match->bestOf() === 5)>Best of 5 &mdash; menang 3 set, set ke-5 sampai 15</option>
+            </select>
+          </div>
         </div>
         <div class="row-3">
           <div>

@@ -11,6 +11,7 @@ class Pertandingan extends Model
 
     protected $fillable = [
         'sport',
+        'best_of',
         'home_name',
         'away_name',
         'home_sub',
@@ -45,6 +46,7 @@ class Pertandingan extends Model
         'home_score' => 'integer',
         'away_score' => 'integer',
         'current_set' => 'integer',
+        'best_of' => 'integer',
         'home_timeouts' => 'integer',
         'away_timeouts' => 'integer',
         'is_active' => 'boolean',
@@ -69,6 +71,8 @@ class Pertandingan extends Model
             'is_active' => true,
             'is_finished' => false,
             'sport' => 'volley',
+            // Format mengikuti pertandingan sebelumnya; default best of 3 (babak penyisihan).
+            'best_of' => $previous->best_of ?? 3,
             'period' => 'SET 1',
             'clock' => '',
             'status' => 'LIVE',
@@ -86,6 +90,19 @@ class Pertandingan extends Model
             'home_timeouts' => 0,
             'away_timeouts' => 0,
         ]);
+    }
+
+    public function bestOf(): int
+    {
+        return $this->best_of === 3 ? 3 : 5;
+    }
+
+    /**
+     * Jumlah set yang harus dimenangkan: 2 (best of 3) atau 3 (best of 5).
+     */
+    public function setsToWin(): int
+    {
+        return intdiv($this->bestOf(), 2) + 1;
     }
 
     public function setsWon(): array
@@ -106,7 +123,8 @@ class Pertandingan extends Model
 
     public function isSetComplete(): bool
     {
-        $target = count($this->set_scores ?? []) === 4 ? 15 : 25;
+        // Set penentu (set ke-3 di best of 3, set ke-5 di best of 5) dimainkan sampai 15.
+        $target = count($this->set_scores ?? []) === $this->bestOf() - 1 ? 15 : 25;
 
         return max($this->home_score, $this->away_score) >= $target
             && abs($this->home_score - $this->away_score) >= 2;
@@ -308,6 +326,7 @@ class Pertandingan extends Model
 
         return [
             'sport' => $this->sport,
+            'bestOf' => $this->bestOf(),
             'logo' => (string) $this->logo,
             'home' => [
                 'name' => $this->home_name,

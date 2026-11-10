@@ -238,7 +238,7 @@ class MatchController extends Controller
         $match->set_scores = $sets;
 
         $setsWon = $match->setsWon();
-        if (max($setsWon) === 3) {
+        if (max($setsWon) >= $match->setsToWin()) {
             $match->is_finished = true;
             $match->status = 'SELESAI';
 
@@ -284,6 +284,7 @@ class MatchController extends Controller
     {
         $data = $request->validate([
             'sport' => 'required|in:volley,futsal',
+            'best_of' => 'nullable|in:3,5',
             'home_name' => 'required|string|max:50',
             'away_name' => 'required|string|max:50',
             'home_sub' => 'nullable|string|max:50',
@@ -309,6 +310,13 @@ class MatchController extends Controller
             if (($data[$field] ?? null) === null) {
                 unset($data[$field]);
             }
+        }
+
+        // Format set tidak dikirim: pertahankan yang tersimpan.
+        if (($data['best_of'] ?? null) === null) {
+            unset($data['best_of']);
+        } else {
+            $data['best_of'] = (int) $data['best_of'];
         }
 
         foreach (['clock', 'status', 'home_sub', 'away_sub'] as $field) {

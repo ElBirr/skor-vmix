@@ -134,6 +134,7 @@
       serving: "",
       timeout: null,
       isFinished: false,
+      bestOf: 5,
       stats: null,
       theme: { primary: "#001c54", accent: "#c00000" }
     };
@@ -166,6 +167,7 @@
     }
 
     model.isFinished = data.isFinished === true;
+    model.bestOf = data.bestOf === 3 ? 3 : 5;
     if (data.stats && data.stats.totals && data.stats.longestRun) {
       model.stats = {
         totals: {
@@ -386,12 +388,13 @@
   // Kondisi set point / match point voli (best of 5, set ke-5 sampai 15).
   function pointSituation(model) {
     if (model.sport !== "volley" || model.isFinished) return null;
-    var target = model.sets.length === 4 ? 15 : 25;
+    var target = model.sets.length === model.bestOf - 1 ? 15 : 25;
     var h = model.home.score;
     var a = model.away.score;
     var side = h > a ? "home" : a > h ? "away" : "";
     if (!side || Math.max(h, a) < target - 1) return null;
-    return { side: side, label: model[side].setsWon === 2 ? "MATCH POINT" : "SET POINT" };
+    var setsToWin = Math.floor(model.bestOf / 2) + 1;
+    return { side: side, label: model[side].setsWon === setsToWin - 1 ? "MATCH POINT" : "SET POINT" };
   }
 
   function formatClock(seconds) {
