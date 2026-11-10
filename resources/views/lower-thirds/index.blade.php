@@ -85,7 +85,7 @@
               </td>
               <td>{{ $lowerThird->subtitle }}</td>
               <td>{{ $lowerThird->duration > 0 ? $lowerThird->duration.' detik' : 'manual' }}</td>
-              <td>
+              <td class="row-actions">
                 <form method="POST" action="{{ route('lower-thirds.show', $lowerThird) }}" class="inline-form">
                   @csrf
                   <button type="submit" class="btn">Tampilkan</button>

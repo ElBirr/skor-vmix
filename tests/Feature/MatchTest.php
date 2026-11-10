@@ -224,6 +224,51 @@ class MatchTest extends TestCase
         $this->getJson('/api/match')->assertJsonPath('durationMinutes', null);
     }
 
+    public function test_best_of_three_finishes_after_two_sets_with_third_set_to_fifteen(): void
+    {
+        $this->createMatch();
+        $match = Pertandingan::active()->first();
+        $this->post('/match', [
+            ...$match->only(['sport', 'period', 'home_name', 'away_name', 'home_color', 'away_color']),
+            'best_of' => 3,
+        ])->assertRedirect();
+        $this->getJson('/api/match')->assertJsonPath('bestOf', 3);
+
+        // Set 1 home, set 2 away.
+        foreach (['home', 'away'] as $side) {
+            foreach (range(1, 25) as $i) {
+                $this->postJson('/match/score', ['side' => $side, 'delta' => 1])->assertOk();
+            }
+        }
+        $this->assertFalse(Pertandingan::active()->first()->is_finished);
+
+        // Set ke-3 (penentu) cukup sampai 15 dan langsung mengakhiri pertandingan.
+        foreach (range(1, 15) as $i) {
+            $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
+        }
+        $m = Pertandingan::active()->first();
+        $this->assertSame([['home' => 25, 'away' => 0], ['home' => 0, 'away' => 25], ['home' => 15, 'away' => 0]], $m->set_scores);
+        $this->assertTrue($m->is_finished);
+        $this->assertSame(['home' => 2, 'away' => 1], $m->setsWon());
+    }
+
+    public function test_best_of_five_still_needs_three_sets(): void
+    {
+        $this->createMatch();
+        $match = Pertandingan::active()->first();
+        $this->post('/match', [
+            ...$match->only(['sport', 'period', 'home_name', 'away_name', 'home_color', 'away_color']),
+            'best_of' => 5,
+        ])->assertRedirect();
+
+        foreach (range(1, 50) as $i) {
+            $this->postJson('/match/score', ['side' => 'home', 'delta' => 1])->assertOk();
+        }
+        $m = Pertandingan::active()->first();
+        $this->assertSame(2, count($m->set_scores));
+        $this->assertFalse($m->is_finished);
+    }
+
     public function test_volleyball_set_requires_a_two_point_lead(): void
     {
         $this->createMatch();
@@ -253,6 +298,7 @@ class MatchTest extends TestCase
         $this->createMatch();
         $match = Pertandingan::active()->first();
         $match->update([
+            'best_of' => 5,
             'set_scores' => [
                 ['home' => 25, 'away' => 20],
                 ['home' => 20, 'away' => 25],

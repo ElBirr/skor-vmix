@@ -22,6 +22,7 @@
       background-image: radial-gradient(circle at 50% 0, rgba(0, 28, 84, 0.95), transparent 65%);
       color: #fff;
       height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -38,9 +39,42 @@
       border-bottom: 2px solid #fff;
       padding: 10px 16px;
       min-height: 58px;
-      overflow-x: auto;
+      flex-wrap: wrap;
     }
-    .topbar-left, .topbar-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .topbar-left, .topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .topbar-right { justify-content: flex-end; }
+    .topbar-right form { margin: 0; }
+    .btn-link.danger { border-color: var(--gt-red); background: rgba(192, 0, 0, 0.25); }
+
+    /* Menu lipat untuk tautan sekunder */
+    .topbar-menu { position: relative; }
+    .topbar-menu summary { list-style: none; }
+    .topbar-menu summary::-webkit-details-marker { display: none; }
+    .topbar-menu[open] summary { background: #fff; color: var(--gt-navy); border-color: #fff; }
+    .topbar-menu-list {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 200px;
+      padding: 8px;
+      background: var(--gt-navy);
+      border: 2px solid #fff;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+    .topbar-menu-list form { margin: 0; }
+    .topbar-menu-list .btn-link { width: 100%; justify-content: flex-start; }
+
+    /* Sentuh: tanpa jeda/zoom ketuk ganda dan tanpa seleksi teks saat tap cepat */
+    button, .btn-link, .ctrl-btn {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      -webkit-user-select: none;
+    }
     .badge {
       background: transparent;
       color: var(--gt-silver);
@@ -126,7 +160,21 @@
       margin-right: 6px;
       vertical-align: baseline;
     }
-    .serving .serve-indicator { background: #fff; }
+    .serving .serve-indicator { background: #ffd400; border-color: #ffd400; border-radius: 50%; box-shadow: 0 0 8px rgba(255, 212, 0, 0.9); }
+
+    /* Tim yang servis disorot jelas: bingkai emas + label SERVIS */
+    .team-panel.serving { border-color: #ffd400; box-shadow: 0 0 0 2px #ffd400, 0 0 22px rgba(255, 212, 0, 0.35); }
+    .team-panel.serving .team-header::after {
+      content: "SERVIS";
+      display: inline-block;
+      margin-top: 6px;
+      padding: 2px 10px;
+      background: #ffd400;
+      color: var(--gt-navy);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+    }
 
     /* Score Display & Big Buttons */
     .score-display {
@@ -138,7 +186,8 @@
       background: rgba(0, 12, 34, 0.35);
     }
     .score-value {
-      font-size: min(26vw, 170px);
+      /* Ikut tinggi layar supaya angka tidak terpotong di tablet landscape */
+      font-size: min(26vw, 170px, 26dvh);
       font-weight: 900;
       line-height: 0.85;
       font-variant-numeric: tabular-nums;
@@ -269,10 +318,28 @@
     @media (max-width: 900px) {
       .arena { gap: 10px; padding: 10px; }
       .team-name { font-size: 18px; }
-      .score-value { font-size: min(24vw, 120px); }
+      .score-value { font-size: min(24vw, 120px, 26dvh); }
       .btn-score { font-size: 28px; padding: 16px 0; }
       .bottombar { min-height: auto; }
     }
+    /* Tablet (layar sentuh hingga 1200px): target sentuh lebih besar */
+    @media (max-width: 1200px) and (pointer: coarse), (max-width: 1100px) {
+      .topbar { padding: 8px 12px; gap: 8px; }
+      .topbar-right { justify-content: flex-start; }
+      .btn-link, .badge { min-height: 40px; }
+      .btn-score { font-size: 44px; padding: 22px 0; }
+      .ctrl-btn { min-height: 52px; padding: 10px 16px; justify-content: center; }
+      .timeout-box { padding: 6px 10px; }
+      .mini { width: 50px; height: 50px; font-size: 24px; }
+      .bottombar { gap: 10px; }
+    }
+
+    /* Tablet potret: ruang vertikal lebih banyak, tombol skor dibuat lebih tinggi */
+    @media (orientation: portrait) and (min-width: 600px) {
+      .btn-score { padding: 40px 0; font-size: 52px; }
+      .score-value { font-size: min(30vw, 200px, 26dvh); }
+    }
+
     @media (max-width: 560px) {
       .btn-score { font-size: 24px; padding: 12px 0; }
       .timeout-box { padding: 4px 6px; gap: 5px; }
@@ -303,17 +370,23 @@
         @endif
       </div>
       <div class="topbar-right">
-        <a href="{{ route('overlay') }}" target="_blank" class="btn-link">vMix Overlay</a>
         <a href="{{ route('control') }}" class="btn-link">Kontrol vMix</a>
-        <a href="{{ route('lower-thirds.index') }}" class="btn-link">Lower Third</a>
-        <a href="{{ route('history') }}" class="btn-link">Riwayat</a>
-        <a href="{{ route('account.edit') }}" class="btn-link">Akun</a>
-        @if (auth()->user()->isAdmin())
-          <a href="{{ route('admin.dashboard') }}" class="btn-link">Admin</a>
-        @endif
         <a href="{{ route('settings') }}" class="btn-link">Pengaturan Tim</a>
-        <form method="POST" action="{{ route('match.finish') }}" onsubmit="return confirm('Selesaikan pertandingan? Data akan masuk ke riwayat.')">@csrf<button type="submit" class="btn-link">Selesai Pertandingan</button></form>
-        <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="btn-link">Keluar</button></form>
+        <form method="POST" action="{{ route('match.finish') }}" onsubmit="return confirm('Selesaikan pertandingan? Data akan masuk ke riwayat.')">@csrf<button type="submit" class="btn-link danger">Selesai Pertandingan</button></form>
+        {{-- Menu yang jarang dipakai dikumpulkan supaya bar atas cukup satu baris di tablet --}}
+        <details class="topbar-menu">
+          <summary class="btn-link">Menu &#9662;</summary>
+          <div class="topbar-menu-list">
+            <a href="{{ route('overlay') }}" target="_blank" class="btn-link">vMix Overlay</a>
+            <a href="{{ route('lower-thirds.index') }}" class="btn-link">Lower Third</a>
+            <a href="{{ route('history') }}" class="btn-link">Riwayat</a>
+            <a href="{{ route('account.edit') }}" class="btn-link">Akun</a>
+            @if (auth()->user()->isAdmin())
+              <a href="{{ route('admin.dashboard') }}" class="btn-link">Admin</a>
+            @endif
+            <form method="POST" action="{{ route('logout') }}">@csrf<button type="submit" class="btn-link">Keluar</button></form>
+          </div>
+        </details>
       </div>
     </div>
 
@@ -565,6 +638,13 @@
       const res = await postJson('{{ route('match.swap') }}', {});
       if (res) location.reload();
       swapSidesBtn.disabled = false;
+    });
+
+    // Tutup menu lipat saat mengetuk di luar menu.
+    document.addEventListener('click', (event) => {
+      document.querySelectorAll('.topbar-menu[open]').forEach(menu => {
+        if (!menu.contains(event.target)) menu.removeAttribute('open');
+      });
     });
 
     // Sinkron dari server (perubahan settings / perangkat lain)
